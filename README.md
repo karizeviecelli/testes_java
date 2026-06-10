@@ -175,7 +175,7 @@ Settings → Pages → Source: Deploy from a branch → Branch: main → / (root
 **2. Acesse pelo link gerado**
 
 ```
-https://karizeviecelli.github.io/testes-java/plano_testes_java.html
+https://seugit.github.io/testes-java/plano_testes_java.html
 ```
 
 **3. Compartilhe com os alunos**
@@ -184,22 +184,6 @@ O link pode ser usado diretamente no celular, tablet ou computador — sem insta
 
 ---
 
-## 🎨 Personalizar
-
-### Alterar nome/ano no rodapé
-
-Todos os rodapés usam o padrão:
-```
-@karizeviecelli · 2026
-```
-
-Para trocar, faça busca e substituição em todos os arquivos `.html`:
-
-```bash
-# Linux / macOS
-find . -name "*.html" -exec sed -i 's/@karizeviecelli/@@seunome/g' {} \;
-find . -name "*.html" -exec sed -i 's/2026/2027/g' {} \;
-```
 
 ### Adicionar alunos pré-cadastrados no Feedback
 
@@ -241,7 +225,6 @@ Sugestões de melhoria, correções de conteúdo ou novas ferramentas são bem-v
 
 ## 📄 Licença
 
-Este material é de uso educacional livre.  
 Permitido usar, adaptar e redistribuir com atribuição à autora.
 
 ---
