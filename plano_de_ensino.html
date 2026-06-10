@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testes em Java — Plano de Ensino · @karizeviecelli · 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #F7F9FC;
+  --surface:   #FFFFFF;
+  --surface2:  #EEF3FB;
+  --border:    #DDE6F5;
+
+  --java:      #E8541A;
+  --java-lt:   #FEE8DC;
+  --java-mid:  #F07040;
+
+  --blue:      #2563EB;
+  --blue-lt:   #DBEAFE;
+  --sky:       #0EA5E9;
+  --sky-lt:    #E0F2FE;
+  --teal:      #0D9488;
+  --teal-lt:   #CCFBF1;
+  --green:     #16A34A;
+  --green-lt:  #DCFCE7;
+  --purple:    #7C3AED;
+  --purple-lt: #EDE9FE;
+  --orange:    #EA580C;
+  --orange-lt: #FFF7ED;
+  --pink:      #DB2777;
+  --pink-lt:   #FCE7F3;
+  --amber:     #D97706;
+  --amber-lt:  #FEF3C7;
+  --indigo:    #4F46E5;
+  --indigo-lt: #EEF2FF;
+  --rose:      #E11D48;
+  --rose-lt:   #FFE4E6;
+  --cyan:      #0891B2;
+  --cyan-lt:   #CFFAFE;
+  --lime:      #65A30D;
+  --lime-lt:   #ECFCCB;
+  --fuchsia:   #C026D3;
+  --fuchsia-lt:#FAE8FF;
+  --slate:     #475569;
+  --slate-lt:  #F1F5F9;
+  --red:       #DC2626;
+  --red-lt:    #FEE2E2;
+
+  --txt:       #1E293B;
+  --txt-2:     #475569;
+  --txt-3:     #94A3B8;
+
+  --nav-w:     270px;
+  --radius:    14px;
+  --shadow:    0 4px 20px rgba(37,99,235,.08);
+  --shadow-lg: 0 8px 40px rgba(37,99,235,.14);
+  --font:      'Nunito', sans-serif;
+  --mono:      'Fira Code', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--bg); color: var(--txt); display: flex; min-height: 100vh; line-height: 1.65; }
+
+/* ═══ SIDEBAR ═══ */
+#sidebar {
+  width: var(--nav-w); background: var(--surface); border-right: 1px solid var(--border);
+  position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto;
+  display: flex; flex-direction: column; z-index: 200; transition: transform .3s ease;
+}
+.sidebar-brand { padding: 22px 20px 16px; border-bottom: 1px solid var(--border); }
+.brand-badge {
+  display: inline-block; background: var(--java); color: #fff;
+  font-size: .66rem; font-weight: 800; letter-spacing: .08em;
+  padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; text-transform: uppercase;
+}
+.brand-title { font-size: 1.1rem; font-weight: 900; color: var(--txt); line-height: 1.25; }
+.brand-title span { color: var(--java); }
+.brand-sub { font-size: .76rem; color: var(--txt-3); margin-top: 4px; }
+.nav-section-label {
+  font-size: .66rem; font-weight: 800; letter-spacing: .1em; color: var(--txt-3);
+  text-transform: uppercase; padding: 14px 20px 5px;
+}
+.nav-group-label {
+  font-size: .7rem; font-weight: 800; letter-spacing: .07em;
+  color: var(--txt-3); text-transform: uppercase;
+  padding: 10px 20px 4px 20px; margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 16px 9px 20px; cursor: pointer; text-decoration: none;
+  color: var(--txt-2); font-size: .84rem; font-weight: 600;
+  transition: background .18s, color .18s;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover { background: var(--surface2); color: var(--java); }
+.nav-item.active { background: var(--java-lt); color: var(--java); border-left-color: var(--java); }
+.nav-dot {
+  width: 26px; height: 26px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; flex-shrink: 0;
+}
+.nav-check { margin-left: auto; font-size: .7rem; opacity: 0; transition: opacity .2s; }
+.nav-item.done .nav-check { opacity: 1; color: var(--green); }
+.sidebar-footer { margin-top: auto; padding: 14px 20px; border-top: 1px solid var(--border); font-size: .75rem; color: var(--txt-3); }
+.progress-bar-wrap { background: var(--surface2); border-radius: 20px; height: 6px; margin-top: 7px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--java), var(--orange)); border-radius: 20px; transition: width .4s ease; }
+
+/* ═══ MAIN ═══ */
+#main { margin-left: var(--nav-w); flex: 1; min-height: 100vh; }
+.topbar {
+  position: sticky; top: 0; background: rgba(247,249,252,.93);
+  backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+  padding: 13px 36px; display: flex; align-items: center;
+  justify-content: space-between; z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 11px; }
+.topbar-crumb { font-size: .8rem; color: var(--txt-3); font-weight: 600; }
+.topbar-crumb span { color: var(--java); }
+.topbar-right { display: flex; gap: 8px; }
+.btn-nav {
+  background: var(--surface); border: 1px solid var(--border); color: var(--txt-2);
+  padding: 7px 15px; border-radius: 8px; font-size: .8rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all .18s;
+  display: flex; align-items: center; gap: 5px;
+}
+.btn-nav:hover { background: var(--java); color: #fff; border-color: var(--java); }
+.btn-nav.primary { background: var(--java); color: #fff; border-color: var(--java); }
+.btn-nav.primary:hover { background: #c44010; }
+#menu-toggle { display: none; background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--txt); }
+
+/* ═══ PAGES ═══ */
+.page { display: none; padding: 36px; max-width: 920px; animation: fadeIn .3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══ HOME ═══ */
+.hero-home {
+  background: linear-gradient(135deg, #FFF4EF 0%, #FEF9F5 40%, #FFF8F0 100%);
+  border: 1px solid #F5D5C5; border-radius: 20px; padding: 44px 40px;
+  margin-bottom: 28px; position: relative; overflow: hidden;
+}
+.hero-home::before {
+  content: '☕'; position: absolute; right: 36px; top: 50%;
+  transform: translateY(-50%); font-size: 8rem; opacity: .08; user-select: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px; background: var(--java-lt);
+  color: var(--java); font-size: .78rem; font-weight: 800; letter-spacing: .06em;
+  padding: 5px 13px; border-radius: 20px; margin-bottom: 14px; text-transform: uppercase;
+}
+.hero-home h1 { font-size: 2.4rem; font-weight: 900; line-height: 1.18; color: var(--txt); margin-bottom: 12px; }
+.hero-home h1 span { color: var(--java); }
+.hero-home p { font-size: 1rem; color: var(--txt-2); max-width: 580px; margin-bottom: 24px; }
+.hero-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+.stat-pill {
+  display: flex; align-items: center; gap: 7px; background: var(--surface);
+  border: 1px solid var(--border); padding: 8px 16px; border-radius: 12px;
+  font-size: .85rem; font-weight: 700; color: var(--txt); box-shadow: var(--shadow);
+}
+
+.section-title {
+  font-size: 1.1rem; font-weight: 800; color: var(--txt);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.aulas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px,1fr)); gap: 14px; margin-bottom: 28px; }
+
+.aula-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; cursor: pointer;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+  position: relative; overflow: hidden;
+}
+.aula-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 4px; border-radius: var(--radius) var(--radius) 0 0;
+}
+.aula-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: transparent; }
+.aula-card-num { font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.aula-card-icon { font-size: 1.9rem; margin-bottom: 9px; display: block; }
+.aula-card h3 { font-size: .94rem; font-weight: 800; color: var(--txt); margin-bottom: 5px; line-height: 1.3; }
+.aula-card p { font-size: .8rem; color: var(--txt-2); line-height: 1.5; }
+.aula-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border); }
+.tag-nivel { font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.aula-card-arrow { font-size: .88rem; color: var(--txt-3); }
+
+/* bloco "o que vem depois" */
+.prox-card {
+  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  border-radius: var(--radius); padding: 26px; color: #fff;
+  position: relative; overflow: hidden;
+}
+.prox-card::after {
+  content: 'TDD'; position: absolute; right: 20px; bottom: -10px;
+  font-family: var(--mono); font-size: 5rem; font-weight: 700; color: rgba(255,255,255,.05);
+}
+.prox-card h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 8px; }
+.prox-card p { font-size: .83rem; color: rgba(255,255,255,.6); margin-bottom: 14px; }
+.prox-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.prox-chip {
+  background: rgba(255,255,255,.1); color: rgba(255,255,255,.8);
+  font-size: .73rem; font-weight: 700; padding: 4px 10px;
+  border-radius: 6px; border: 1px solid rgba(255,255,255,.12);
+}
+
+/* ═══ AULA PAGE ═══ */
+.aula-hero { border-radius: 20px; padding: 36px 36px 32px; margin-bottom: 24px; position: relative; overflow: hidden; }
+.aula-hero-eyebrow { font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .7; margin-bottom: 7px; }
+.aula-hero h1 { font-size: 1.85rem; font-weight: 900; line-height: 1.2; margin-bottom: 10px; color: var(--txt); }
+.aula-hero p { font-size: .96rem; color: var(--txt-2); max-width: 600px; margin-bottom: 20px; }
+.aula-meta-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.meta-chip {
+  display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,.7);
+  border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px;
+  font-size: .8rem; font-weight: 700; color: var(--txt); backdrop-filter: blur(4px);
+}
+
+/* accordion */
+.content-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 18px; overflow: hidden; }
+.section-header {
+  padding: 14px 20px; display: flex; align-items: center; gap: 11px;
+  cursor: pointer; user-select: none; border-bottom: 1px solid transparent; transition: background .15s;
+}
+.section-header:hover { background: var(--surface2); }
+.section-header.open { border-bottom-color: var(--border); }
+.section-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+.section-label { font-size: .94rem; font-weight: 800; color: var(--txt); flex: 1; }
+.section-chevron { color: var(--txt-3); transition: transform .25s; font-size: .88rem; }
+.section-header.open .section-chevron { transform: rotate(180deg); }
+.section-body { padding: 0; max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .35s; }
+.section-body.open { padding: 18px 20px 20px; max-height: 2400px; }
+
+/* listas */
+.item-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.item-list li { display: flex; align-items: flex-start; gap: 9px; font-size: .88rem; color: var(--txt-2); line-height: 1.55; }
+.item-list li::before { content: '›'; font-size: 1.1rem; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.steps-list { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.steps-list li { display: flex; gap: 13px; align-items: flex-start; font-size: .88rem; color: var(--txt-2); line-height: 1.55; }
+.step-num { width: 25px; height: 25px; border-radius: 7px; background: var(--java-lt); color: var(--java); font-size: .75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+
+/* ferr grid */
+.ferr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 11px; }
+.ferr-card {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 11px;
+  padding: 14px; text-decoration: none; color: var(--txt); transition: all .2s;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.ferr-card:hover { border-color: var(--java); box-shadow: 0 0 0 3px var(--java-lt); transform: translateY(-2px); }
+.ferr-icon { font-size: 1.4rem; }
+.ferr-title { font-size: .86rem; font-weight: 800; color: var(--txt); line-height: 1.3; }
+.ferr-desc { font-size: .76rem; color: var(--txt-3); }
+.ferr-link { display: flex; align-items: center; gap: 5px; font-size: .76rem; font-weight: 700; color: var(--java); margin-top: 3px; }
+
+/* deep links */
+.deep-list { display: flex; flex-direction: column; gap: 7px; }
+.deep-link {
+  display: flex; align-items: center; gap: 9px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px;
+  text-decoration: none; color: var(--txt); font-size: .86rem; font-weight: 600; transition: all .18s;
+}
+.deep-link:hover { border-color: var(--java); color: var(--java); background: var(--java-lt); }
+.deep-link-arrow { margin-left: auto; color: var(--txt-3); font-size: .83rem; transition: transform .18s; }
+.deep-link:hover .deep-link-arrow { transform: translateX(4px); color: var(--java); }
+
+/* desafio */
+.desafio-box { border-radius: 15px; border: 2px solid; overflow: hidden; margin-bottom: 18px; }
+.desafio-header { padding: 18px 22px 14px; display: flex; align-items: flex-start; gap: 13px; }
+.desafio-emoji { font-size: 2rem; line-height: 1; }
+.desafio-header-text h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 4px; }
+.desafio-header-text p { font-size: .86rem; opacity: .75; line-height: 1.5; }
+.desafio-body { padding: 0 22px 22px; }
+.desafio-checklist { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+.desafio-checklist li { display: flex; align-items: flex-start; gap: 9px; font-size: .88rem; line-height: 1.55; padding: 7px 11px; border-radius: 8px; }
+.check-box { width: 19px; height: 19px; border-radius: 5px; border: 2px solid; flex-shrink: 0; margin-top: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .68rem; transition: all .15s; }
+.desafio-entrega { border-radius: 9px; padding: 12px 14px; font-size: .86rem; margin-bottom: 14px; }
+.desafio-entrega strong { display: block; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 3px; }
+.criterios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.criterio-chip { background: rgba(255,255,255,.5); border: 1px solid; border-radius: 8px; padding: 7px 11px; font-size: .78rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+
+/* mundo do trabalho */
+.mundo-box {
+  background: linear-gradient(135deg, #FFF4EF, #FEF9F5);
+  border: 1px solid #F5D5C5; border-radius: 13px; padding: 20px 22px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.mundo-icon { font-size: 1.9rem; flex-shrink: 0; }
+.mundo-box h4 { font-size: .86rem; font-weight: 800; color: var(--java); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .06em; }
+.mundo-box p { font-size: .88rem; color: var(--txt-2); line-height: 1.6; }
+
+/* progresso */
+.aula-progress {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.progress-ring { font-size: 1.9rem; }
+.progress-text { flex: 1; }
+.progress-text h4 { font-size: .86rem; font-weight: 800; color: var(--txt); margin-bottom: 2px; }
+.progress-text p { font-size: .76rem; color: var(--txt-3); }
+.btn-complete {
+  background: var(--green); color: #fff; border: none; padding: 8px 18px;
+  border-radius: 9px; font-size: .83rem; font-weight: 800; cursor: pointer;
+  font-family: var(--font); transition: all .18s; display: flex; align-items: center; gap: 5px;
+}
+.btn-complete:hover { background: #15803D; transform: scale(1.03); }
+.btn-complete.done { background: var(--surface2); color: var(--green); border: 2px solid var(--green); }
+
+code { font-family: var(--mono); background: var(--surface2); border: 1px solid var(--border); color: var(--java); padding: 2px 6px; border-radius: 5px; font-size: .8em; }
+
+/* ═══ CORES POR AULA (15 aulas) ═══ */
+/* tons para cada aula */
+.t01{--ac:var(--java);--ac-lt:var(--java-lt);--ac-mid:var(--java-mid);}
+.t02{--ac:var(--blue);--ac-lt:var(--blue-lt);--ac-mid:#3B82F6;}
+.t03{--ac:var(--purple);--ac-lt:var(--purple-lt);--ac-mid:#8B5CF6;}
+.t04{--ac:var(--teal);--ac-lt:var(--teal-lt);--ac-mid:#14B8A6;}
+.t05{--ac:var(--sky);--ac-lt:var(--sky-lt);--ac-mid:#38BDF8;}
+.t06{--ac:var(--green);--ac-lt:var(--green-lt);--ac-mid:#22C55E;}
+.t07{--ac:var(--amber);--ac-lt:var(--amber-lt);--ac-mid:#F59E0B;}
+.t08{--ac:var(--indigo);--ac-lt:var(--indigo-lt);--ac-mid:#6366F1;}
+.t09{--ac:var(--pink);--ac-lt:var(--pink-lt);--ac-mid:#EC4899;}
+.t10{--ac:var(--cyan);--ac-lt:var(--cyan-lt);--ac-mid:#22D3EE;}
+.t11{--ac:var(--lime);--ac-lt:var(--lime-lt);--ac-mid:#84CC16;}
+.t12{--ac:var(--rose);--ac-lt:var(--rose-lt);--ac-mid:#F43F5E;}
+.t13{--ac:var(--fuchsia);--ac-lt:var(--fuchsia-lt);--ac-mid:#E879F9;}
+.t14{--ac:var(--orange);--ac-lt:var(--orange-lt);--ac-mid:#F97316;}
+.t15{--ac:var(--slate);--ac-lt:var(--slate-lt);--ac-mid:#64748B;}
+
+[class*="t0"],[class*="t1"] { }
+[class*="t"] .aula-hero{background:linear-gradient(135deg,var(--ac-lt),#F7F9FC);border:1px solid var(--border);}
+[class*="t"] .aula-hero-eyebrow{color:var(--ac);}
+[class*="t"] .section-icon{background:var(--ac-lt);color:var(--ac);}
+[class*="t"] .item-list li::before{color:var(--ac);}
+[class*="t"] .step-num{background:var(--ac-lt);color:var(--ac);}
+
+/* card top bars */
+.c01::before{background:var(--java);}
+.c02::before{background:var(--blue);}
+.c03::before{background:var(--purple);}
+.c04::before{background:var(--teal);}
+.c05::before{background:var(--sky);}
+.c06::before{background:var(--green);}
+.c07::before{background:var(--amber);}
+.c08::before{background:var(--indigo);}
+.c09::before{background:var(--pink);}
+.c10::before{background:var(--cyan);}
+.c11::before{background:var(--lime);}
+.c12::before{background:var(--rose);}
+.c13::before{background:var(--fuchsia);}
+.c14::before{background:var(--orange);}
+.c15::before{background:var(--slate);}
+
+.c01 .aula-card-num{color:var(--java);} .c01 .tag-nivel{background:var(--java-lt);color:var(--java);}
+.c02 .aula-card-num{color:var(--blue);} .c02 .tag-nivel{background:var(--blue-lt);color:var(--blue);}
+.c03 .aula-card-num{color:var(--purple);} .c03 .tag-nivel{background:var(--purple-lt);color:var(--purple);}
+.c04 .aula-card-num{color:var(--teal);} .c04 .tag-nivel{background:var(--teal-lt);color:var(--teal);}
+.c05 .aula-card-num{color:var(--sky);} .c05 .tag-nivel{background:var(--sky-lt);color:var(--sky);}
+.c06 .aula-card-num{color:var(--green);} .c06 .tag-nivel{background:var(--green-lt);color:var(--green);}
+.c07 .aula-card-num{color:var(--amber);} .c07 .tag-nivel{background:var(--amber-lt);color:var(--amber);}
+.c08 .aula-card-num{color:var(--indigo);} .c08 .tag-nivel{background:var(--indigo-lt);color:var(--indigo);}
+.c09 .aula-card-num{color:var(--pink);} .c09 .tag-nivel{background:var(--pink-lt);color:var(--pink);}
+.c10 .aula-card-num{color:var(--cyan);} .c10 .tag-nivel{background:var(--cyan-lt);color:var(--cyan);}
+.c11 .aula-card-num{color:var(--lime);} .c11 .tag-nivel{background:var(--lime-lt);color:var(--lime);}
+.c12 .aula-card-num{color:var(--rose);} .c12 .tag-nivel{background:var(--rose-lt);color:var(--rose);}
+.c13 .aula-card-num{color:var(--fuchsia);} .c13 .tag-nivel{background:var(--fuchsia-lt);color:var(--fuchsia);}
+.c14 .aula-card-num{color:var(--orange);} .c14 .tag-nivel{background:var(--orange-lt);color:var(--orange);}
+.c15 .aula-card-num{color:var(--slate);} .c15 .tag-nivel{background:var(--slate-lt);color:var(--slate);}
+
+/* nav dots */
+.nd01{background:var(--java-lt);color:var(--java);}
+.nd02{background:var(--blue-lt);color:var(--blue);}
+.nd03{background:var(--purple-lt);color:var(--purple);}
+.nd04{background:var(--teal-lt);color:var(--teal);}
+.nd05{background:var(--sky-lt);color:var(--sky);}
+.nd06{background:var(--green-lt);color:var(--green);}
+.nd07{background:var(--amber-lt);color:var(--amber);}
+.nd08{background:var(--indigo-lt);color:var(--indigo);}
+.nd09{background:var(--pink-lt);color:var(--pink);}
+.nd10{background:var(--cyan-lt);color:var(--cyan);}
+.nd11{background:var(--lime-lt);color:var(--lime);}
+.nd12{background:var(--rose-lt);color:var(--rose);}
+.nd13{background:var(--fuchsia-lt);color:var(--fuchsia);}
+.nd14{background:var(--orange-lt);color:var(--orange);}
+.nd15{background:var(--slate-lt);color:var(--slate);}
+
+/* desafio por aula */
+.t01 .desafio-box{border-color:var(--java-lt);} .t01 .desafio-header{background:var(--java-lt);} .t01 .desafio-header-text h3{color:var(--java);} .t01 .desafio-checklist li{background:#FFF4EF;} .t01 .check-box{border-color:var(--java);color:var(--java);} .t01 .check-box.checked{background:var(--java);color:#fff;} .t01 .desafio-entrega{background:var(--java-lt);color:var(--java);} .t01 .criterio-chip{border-color:var(--java-lt);background:var(--java-lt);color:var(--java);}
+.t02 .desafio-box{border-color:var(--blue-lt);} .t02 .desafio-header{background:var(--blue-lt);} .t02 .desafio-header-text h3{color:var(--blue);} .t02 .desafio-checklist li{background:#F0F7FF;} .t02 .check-box{border-color:var(--blue);color:var(--blue);} .t02 .check-box.checked{background:var(--blue);color:#fff;} .t02 .desafio-entrega{background:var(--blue-lt);color:var(--blue);} .t02 .criterio-chip{border-color:var(--blue-lt);background:var(--blue-lt);color:var(--blue);}
+.t03 .desafio-box{border-color:var(--purple-lt);} .t03 .desafio-header{background:var(--purple-lt);} .t03 .desafio-header-text h3{color:var(--purple);} .t03 .desafio-checklist li{background:#FAF5FF;} .t03 .check-box{border-color:var(--purple);color:var(--purple);} .t03 .check-box.checked{background:var(--purple);color:#fff;} .t03 .desafio-entrega{background:var(--purple-lt);color:var(--purple);} .t03 .criterio-chip{border-color:var(--purple-lt);background:var(--purple-lt);color:var(--purple);}
+.t04 .desafio-box{border-color:var(--teal-lt);} .t04 .desafio-header{background:var(--teal-lt);} .t04 .desafio-header-text h3{color:var(--teal);} .t04 .desafio-checklist li{background:#F0FDFA;} .t04 .check-box{border-color:var(--teal);color:var(--teal);} .t04 .check-box.checked{background:var(--teal);color:#fff;} .t04 .desafio-entrega{background:var(--teal-lt);color:var(--teal);} .t04 .criterio-chip{border-color:var(--teal-lt);background:var(--teal-lt);color:var(--teal);}
+.t05 .desafio-box{border-color:var(--sky-lt);} .t05 .desafio-header{background:var(--sky-lt);} .t05 .desafio-header-text h3{color:var(--sky);} .t05 .desafio-checklist li{background:#F0F9FF;} .t05 .check-box{border-color:var(--sky);color:var(--sky);} .t05 .check-box.checked{background:var(--sky);color:#fff;} .t05 .desafio-entrega{background:var(--sky-lt);color:var(--sky);} .t05 .criterio-chip{border-color:var(--sky-lt);background:var(--sky-lt);color:var(--sky);}
+.t06 .desafio-box{border-color:var(--green-lt);} .t06 .desafio-header{background:var(--green-lt);} .t06 .desafio-header-text h3{color:var(--green);} .t06 .desafio-checklist li{background:#F0FDF4;} .t06 .check-box{border-color:var(--green);color:var(--green);} .t06 .check-box.checked{background:var(--green);color:#fff;} .t06 .desafio-entrega{background:var(--green-lt);color:var(--green);} .t06 .criterio-chip{border-color:var(--green-lt);background:var(--green-lt);color:var(--green);}
+.t07 .desafio-box{border-color:var(--amber-lt);} .t07 .desafio-header{background:var(--amber-lt);} .t07 .desafio-header-text h3{color:var(--amber);} .t07 .desafio-checklist li{background:#FFFBEB;} .t07 .check-box{border-color:var(--amber);color:var(--amber);} .t07 .check-box.checked{background:var(--amber);color:#fff;} .t07 .desafio-entrega{background:var(--amber-lt);color:var(--amber);} .t07 .criterio-chip{border-color:var(--amber-lt);background:var(--amber-lt);color:var(--amber);}
+.t08 .desafio-box{border-color:var(--indigo-lt);} .t08 .desafio-header{background:var(--indigo-lt);} .t08 .desafio-header-text h3{color:var(--indigo);} .t08 .desafio-checklist li{background:#EEF2FF;} .t08 .check-box{border-color:var(--indigo);color:var(--indigo);} .t08 .check-box.checked{background:var(--indigo);color:#fff;} .t08 .desafio-entrega{background:var(--indigo-lt);color:var(--indigo);} .t08 .criterio-chip{border-color:var(--indigo-lt);background:var(--indigo-lt);color:var(--indigo);}
+.t09 .desafio-box{border-color:var(--pink-lt);} .t09 .desafio-header{background:var(--pink-lt);} .t09 .desafio-header-text h3{color:var(--pink);} .t09 .desafio-checklist li{background:#FFF0F7;} .t09 .check-box{border-color:var(--pink);color:var(--pink);} .t09 .check-box.checked{background:var(--pink);color:#fff;} .t09 .desafio-entrega{background:var(--pink-lt);color:var(--pink);} .t09 .criterio-chip{border-color:var(--pink-lt);background:var(--pink-lt);color:var(--pink);}
+.t10 .desafio-box{border-color:var(--cyan-lt);} .t10 .desafio-header{background:var(--cyan-lt);} .t10 .desafio-header-text h3{color:var(--cyan);} .t10 .desafio-checklist li{background:#ECFEFF;} .t10 .check-box{border-color:var(--cyan);color:var(--cyan);} .t10 .check-box.checked{background:var(--cyan);color:#fff;} .t10 .desafio-entrega{background:var(--cyan-lt);color:var(--cyan);} .t10 .criterio-chip{border-color:var(--cyan-lt);background:var(--cyan-lt);color:var(--cyan);}
+.t11 .desafio-box{border-color:var(--lime-lt);} .t11 .desafio-header{background:var(--lime-lt);} .t11 .desafio-header-text h3{color:var(--lime);} .t11 .desafio-checklist li{background:#F7FEE7;} .t11 .check-box{border-color:var(--lime);color:var(--lime);} .t11 .check-box.checked{background:var(--lime);color:#fff;} .t11 .desafio-entrega{background:var(--lime-lt);color:var(--lime);} .t11 .criterio-chip{border-color:var(--lime-lt);background:var(--lime-lt);color:var(--lime);}
+.t12 .desafio-box{border-color:var(--rose-lt);} .t12 .desafio-header{background:var(--rose-lt);} .t12 .desafio-header-text h3{color:var(--rose);} .t12 .desafio-checklist li{background:#FFF1F2;} .t12 .check-box{border-color:var(--rose);color:var(--rose);} .t12 .check-box.checked{background:var(--rose);color:#fff;} .t12 .desafio-entrega{background:var(--rose-lt);color:var(--rose);} .t12 .criterio-chip{border-color:var(--rose-lt);background:var(--rose-lt);color:var(--rose);}
+.t13 .desafio-box{border-color:var(--fuchsia-lt);} .t13 .desafio-header{background:var(--fuchsia-lt);} .t13 .desafio-header-text h3{color:var(--fuchsia);} .t13 .desafio-checklist li{background:#FDF4FF;} .t13 .check-box{border-color:var(--fuchsia);color:var(--fuchsia);} .t13 .check-box.checked{background:var(--fuchsia);color:#fff;} .t13 .desafio-entrega{background:var(--fuchsia-lt);color:var(--fuchsia);} .t13 .criterio-chip{border-color:var(--fuchsia-lt);background:var(--fuchsia-lt);color:var(--fuchsia);}
+.t14 .desafio-box{border-color:var(--orange-lt);} .t14 .desafio-header{background:var(--orange-lt);} .t14 .desafio-header-text h3{color:var(--orange);} .t14 .desafio-checklist li{background:#FFF7ED;} .t14 .check-box{border-color:var(--orange);color:var(--orange);} .t14 .check-box.checked{background:var(--orange);color:#fff;} .t14 .desafio-entrega{background:var(--orange-lt);color:var(--orange);} .t14 .criterio-chip{border-color:var(--orange-lt);background:var(--orange-lt);color:var(--orange);}
+.t15 .desafio-box{border-color:var(--slate-lt);} .t15 .desafio-header{background:var(--slate-lt);} .t15 .desafio-header-text h3{color:var(--slate);} .t15 .desafio-checklist li{background:#F8FAFC;} .t15 .check-box{border-color:var(--slate);color:var(--slate);} .t15 .check-box.checked{background:var(--slate);color:#fff;} .t15 .desafio-entrega{background:var(--slate-lt);color:var(--slate);} .t15 .criterio-chip{border-color:var(--slate-lt);background:var(--slate-lt);color:var(--slate);}
+
+/* mobile */
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%);}
+  #sidebar.open{transform:translateX(0);}
+  #main{margin-left:0;}
+  #menu-toggle{display:flex;}
+  .page{padding:20px 16px;}
+  .hero-home{padding:24px 18px;}
+  .hero-home h1{font-size:1.8rem;}
+  .hero-home::before{display:none;}
+  .criterios-grid{grid-template-columns:1fr;}
+  .topbar{padding:11px 16px;}
+  .aula-hero{padding:22px 18px;}
+  .aula-hero h1{font-size:1.4rem;}
+}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:150;}
+#overlay.show{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-badge">@karizeviecelli · 2026</div>
+    <div class="brand-title">Testes em <span>Java</span></div>
+    <div class="brand-sub">Desenvolvimento de Sistemas · 15 aulas · 60h</div>
+  </div>
+
+  <div class="nav-section-label">Início</div>
+  <a class="nav-item active" onclick="goTo('home')" href="#">
+    <span class="nav-dot" style="background:#FEE8DC;color:#E8541A;">🏠</span>
+    Visão Geral
+  </a>
+
+  <div class="nav-group-label">Bloco 1 — Fundamentos</div>
+  <a class="nav-item" onclick="goTo('a01')" href="#" data-page="a01"><span class="nav-dot nd01">01</span>JUnit 5 &amp; Primeiro Teste<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a02')" href="#" data-page="a02"><span class="nav-dot nd02">02</span>Assertions &amp; @Parameterized<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a03')" href="#" data-page="a03"><span class="nav-dot nd03">03</span>TDD — Red Green Refactor<span class="nav-check">✓</span></a>
+
+  <div class="nav-group-label">Bloco 2 — Mocks &amp; Integração</div>
+  <a class="nav-item" onclick="goTo('a04')" href="#" data-page="a04"><span class="nav-dot nd04">04</span>Mockito — Mocks e Stubs<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a05')" href="#" data-page="a05"><span class="nav-dot nd05">05</span>Spring Boot Test &amp; MockMvc<span class="nav-check">✓</span></a>
+
+  <div class="nav-group-label">Bloco 3 — Qualidade &amp; Cobertura</div>
+  <a class="nav-item" onclick="goTo('a06')" href="#" data-page="a06"><span class="nav-dot nd06">06</span>JaCoCo — Cobertura<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a07')" href="#" data-page="a07"><span class="nav-dot nd07">07</span>Mutation Testing — PIT<span class="nav-check">✓</span></a>
+
+  <div class="nav-group-label">Bloco 4 — Tipos Especializados</div>
+  <a class="nav-item" onclick="goTo('a08')" href="#" data-page="a08"><span class="nav-dot nd08">08</span>JMH — Performance<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a09')" href="#" data-page="a09"><span class="nav-dot nd09">09</span>RestAssured — API REST<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a10')" href="#" data-page="a10"><span class="nav-dot nd10">10</span>Pact JVM — Contratos<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a11')" href="#" data-page="a11"><span class="nav-dot nd11">11</span>Gatling — Carga<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a12')" href="#" data-page="a12"><span class="nav-dot nd12">12</span>Segurança — OWASP<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a13')" href="#" data-page="a13"><span class="nav-dot nd13">13</span>ArchUnit — Arquitetura<span class="nav-check">✓</span></a>
+
+  <div class="nav-group-label">Bloco 5 — Projeto</div>
+  <a class="nav-item" onclick="goTo('a14')" href="#" data-page="a14"><span class="nav-dot nd14">14</span>Projeto Integrador<span class="nav-check">✓</span></a>
+  <a class="nav-item" onclick="goTo('a15')" href="#" data-page="a15"><span class="nav-dot nd15">15</span>Apresentação Final<span class="nav-check">✓</span></a>
+
+  <div class="sidebar-footer">
+    <div style="font-weight:700;color:var(--txt-2);margin-bottom:3px;">Seu progresso</div>
+    <div style="color:var(--txt-3);font-size:.73rem;" id="progress-label">0 de 15 aulas concluídas</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</nav>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-crumb" id="topbar-crumb">Testes em Java · <span>Visão Geral</span></span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-nav" id="btn-prev" onclick="prevPage()" style="display:none">← Anterior</button>
+      <button class="btn-nav primary" id="btn-next" onclick="nextPage()">Começar Aula 01 →</button>
+    </div>
+  </div>
+
+  <!-- ═════════ HOME ═════════ -->
+  <div class="page active" id="page-home">
+    <div class="hero-home">
+      <div class="hero-eyebrow">☕ Desenvolvimento de Sistemas · 2026</div>
+      <h1>Testes em <span>Java</span><br>do JUnit ao ArchUnit</h1>
+      <p>Aprenda a garantir a qualidade do software com testes automatizados profissionais. Das primeiras assertions ao mutation testing, cobrindo todas as camadas de uma aplicação Java real.</p>
+      <div class="hero-stats">
+        <div class="stat-pill"><span>📅</span> 15 aulas</div>
+        <div class="stat-pill"><span>⏱️</span> 4h cada</div>
+        <div class="stat-pill"><span>🎯</span> 60h totais</div>
+        <div class="stat-pill"><span>☕</span> Java + JUnit 5 + Spring</div>
+        <div class="stat-pill"><span>👩‍🏫</span> @karizeviecelli</div>
+      </div>
+    </div>
+
+    <div class="section-title">🟧 Bloco 1 — Fundamentos de Teste</div>
+    <div class="aulas-grid">
+      <div class="aula-card c01" onclick="goTo('a01')">
+        <div class="aula-card-num">Aula 01</div>
+        <span class="aula-card-icon">🧪</span>
+        <h3>JUnit 5 &amp; Primeiro Teste</h3>
+        <p>Setup do projeto, @Test, @BeforeEach, assertEquals, padrão Arrange-Act-Assert.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Introdutório</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c02" onclick="goTo('a02')">
+        <div class="aula-card-num">Aula 02</div>
+        <span class="aula-card-icon">📊</span>
+        <h3>Assertions Avançadas &amp; @ParameterizedTest</h3>
+        <p>assertThrows, assertAll, @CsvSource, @ValueSource, @DisplayName.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Básico</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c03" onclick="goTo('a03')">
+        <div class="aula-card-num">Aula 03</div>
+        <span class="aula-card-icon">🔴</span>
+        <h3>TDD — Red Green Refactor</h3>
+        <p>Ciclo completo, baby steps, design emergente, katas documentados por commits.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Básico</span><span class="aula-card-arrow">→</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">🔵 Bloco 2 — Mocks &amp; Integração</div>
+    <div class="aulas-grid">
+      <div class="aula-card c04" onclick="goTo('a04')">
+        <div class="aula-card-num">Aula 04</div>
+        <span class="aula-card-icon">🎭</span>
+        <h3>Mockito — Mocks e Stubs</h3>
+        <p>@Mock, @InjectMocks, when/thenReturn, verify, ArgumentCaptor.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Intermediário</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c05" onclick="goTo('a05')">
+        <div class="aula-card-num">Aula 05</div>
+        <span class="aula-card-icon">🌱</span>
+        <h3>Spring Boot Test &amp; MockMvc</h3>
+        <p>@WebMvcTest, @DataJpaTest, MockMvc, jsonPath, status codes.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Intermediário</span><span class="aula-card-arrow">→</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">🟢 Bloco 3 — Qualidade &amp; Cobertura</div>
+    <div class="aulas-grid">
+      <div class="aula-card c06" onclick="goTo('a06')">
+        <div class="aula-card-num">Aula 06</div>
+        <span class="aula-card-icon">📈</span>
+        <h3>JaCoCo — Cobertura de Código</h3>
+        <p>Line/branch coverage, relatório HTML, threshold 80%, CI/CD.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Intermediário</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c07" onclick="goTo('a07')">
+        <div class="aula-card-num">Aula 07</div>
+        <span class="aula-card-icon">☢️</span>
+        <h3>Mutation Testing com PIT</h3>
+        <p>Mutantes, mutation score, operadores, matar boundary mutants.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">🟣 Bloco 4 — Tipos Especializados</div>
+    <div class="aulas-grid">
+      <div class="aula-card c08" onclick="goTo('a08')">
+        <div class="aula-card-num">Aula 08</div>
+        <span class="aula-card-icon">⚡</span>
+        <h3>JMH — Performance</h3>
+        <p>Microbenchmarks, @Benchmark, BenchmarkMode, warmup.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c09" onclick="goTo('a09')">
+        <div class="aula-card-num">Aula 09</div>
+        <span class="aula-card-icon">🌐</span>
+        <h3>RestAssured — API REST</h3>
+        <p>given/when/then, jsonPath, autenticação, schema validation.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c10" onclick="goTo('a10')">
+        <div class="aula-card-num">Aula 10</div>
+        <span class="aula-card-icon">📋</span>
+        <h3>Pact JVM — Contratos</h3>
+        <p>Consumer-driven contracts, Pact Broker, microsserviços.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c11" onclick="goTo('a11')">
+        <div class="aula-card-num">Aula 11</div>
+        <span class="aula-card-icon">📉</span>
+        <h3>Gatling — Testes de Carga</h3>
+        <p>Simulation, ramp-up, SLA assertions, relatório HTML.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c12" onclick="goTo('a12')">
+        <div class="aula-card-num">Aula 12</div>
+        <span class="aula-card-icon">🔒</span>
+        <h3>Segurança — OWASP</h3>
+        <p>Dependency-Check, SpotBugs, Find Security Bugs, SQL Injection.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c13" onclick="goTo('a13')">
+        <div class="aula-card-num">Aula 13</div>
+        <span class="aula-card-icon">🏛️</span>
+        <h3>ArchUnit — Arquitetura</h3>
+        <p>Regras de camadas, dependências proibidas, naming conventions.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Avançado</span><span class="aula-card-arrow">→</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">🟠 Bloco 5 — Projeto Integrador</div>
+    <div class="aulas-grid">
+      <div class="aula-card c14" onclick="goTo('a14')">
+        <div class="aula-card-num">Aula 14</div>
+        <span class="aula-card-icon">🔨</span>
+        <h3>Projeto Integrador — Dev</h3>
+        <p>API completa com todos os tipos de teste, pipeline CI/CD e JaCoCo.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Integrador</span><span class="aula-card-arrow">→</span></div>
+      </div>
+      <div class="aula-card c15" onclick="goTo('a15')">
+        <div class="aula-card-num">Aula 15</div>
+        <span class="aula-card-icon">🎓</span>
+        <h3>Apresentação Final</h3>
+        <p>Demo ao vivo, defesa técnica, retrospectiva e encerramento.</p>
+        <div class="aula-card-footer"><span class="tag-nivel">Integrador</span><span class="aula-card-arrow">→</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">📦 Ferramentas do Curso</div>
+    <div class="prox-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="background:rgba(255,255,255,.12);border-radius:8px;padding:5px 11px;font-size:.76rem;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:.06em;">STACK COMPLETA</span>
+      </div>
+      <h3>Java · Maven · JUnit 5 · Spring Boot</h3>
+      <p>Todas as ferramentas usadas são gratuitas ou open-source. O professor disponibiliza o repositório base com as dependências configuradas.</p>
+      <div class="prox-chips">
+        <span class="prox-chip">JUnit 5</span><span class="prox-chip">Mockito</span>
+        <span class="prox-chip">Spring Boot Test</span><span class="prox-chip">MockMvc</span>
+        <span class="prox-chip">JaCoCo</span><span class="prox-chip">PIT Mutation</span>
+        <span class="prox-chip">JMH</span><span class="prox-chip">RestAssured</span>
+        <span class="prox-chip">Pact JVM</span><span class="prox-chip">Gatling</span>
+        <span class="prox-chip">OWASP Dep-Check</span><span class="prox-chip">ArchUnit</span>
+        <span class="prox-chip">GitHub Actions</span><span class="prox-chip">IntelliJ IDEA</span>
+      </div>
+    </div>
+  </div><!-- /home -->
+
+  <!-- ═════════ AULA 01 ═════════ -->
+  <div class="page t01" id="page-a01">
+    <div class="aula-progress">
+      <span class="progress-ring">📖</span>
+      <div class="progress-text"><h4>Aula 01 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div>
+      <button class="btn-complete" id="complete-a01" onclick="markDone('a01')">✓ Marcar como concluída</button>
+    </div>
+    <div class="aula-hero">
+      <div class="aula-hero-eyebrow">Aula 01 · Introdutório · 4 horas</div>
+      <h1>🧪 JUnit 5 &amp; Primeiro Teste</h1>
+      <p>Configure o ambiente, escreva seu primeiro @Test e entenda a pirâmide de testes que vai guiar todo o curso. A base de tudo que vem depois.</p>
+      <div class="aula-meta-row">
+        <span class="meta-chip">⏱️ 4 horas</span>
+        <span class="meta-chip">☕ Maven + JUnit 5</span>
+        <span class="meta-chip">🎯 Introdutório</span>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header open" onclick="toggle(this)">
+        <span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body open">
+        <ul class="item-list">
+          <li>Por que testes automatizados existem: custo de bug em prod vs. dev</li>
+          <li>Configurar <code>junit-jupiter</code> no <code>pom.xml</code> e rodar <code>mvn test</code></li>
+          <li>Anotações essenciais: <code>@Test</code>, <code>@BeforeEach</code>, <code>@AfterEach</code>, <code>@BeforeAll</code></li>
+          <li>Padrão Arrange-Act-Assert (AAA): organizar cada teste em 3 fases claras</li>
+          <li>Assertions: <code>assertEquals</code>, <code>assertTrue</code>, <code>assertFalse</code>, <code>assertNotNull</code></li>
+          <li>Nomenclatura de testes: <code>deveRetornarX_QuandoY()</code></li>
+          <li>Executar testes na IDE (IntelliJ) e interpretar o relatório de resultados</li>
+        </ul>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header" onclick="toggle(this)">
+        <span class="section-icon">📋</span><span class="section-label">Roteiro da Aula (4h)</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <ol class="steps-list">
+          <li><span class="step-num">1</span><span><strong>Exposição — 40 min:</strong> pirâmide de testes, custo de bugs por fase, panorama do curso completo.</span></li>
+          <li><span class="step-num">2</span><span><strong>Demonstração ao vivo — 45 min:</strong> criar projeto Maven do zero, adicionar JUnit 5, escrever e rodar os 5 primeiros testes.</span></li>
+          <li><span class="step-num">3</span><span><strong>Prática guiada — 70 min:</strong> alunos replicam a Calculadora com @BeforeEach e todas as assertions.</span></li>
+          <li><span class="step-num">4</span><span><strong>Desafio autônomo — 45 min:</strong> suíte para a classe BancoConta.</span></li>
+          <li><span class="step-num">5</span><span><strong>Code review coletivo — 20 min:</strong> 3 alunos exibem os testes; turma discute nomenclatura e AAA.</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header" onclick="toggle(this)">
+        <span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="ferr-grid">
+          <a href="https://junit.org/junit5/docs/current/user-guide/" target="_blank" class="ferr-card"><span class="ferr-icon">📖</span><div class="ferr-title">JUnit 5 User Guide</div><div class="ferr-desc">Documentação oficial completa</div><div class="ferr-link">Abrir docs ↗</div></a>
+          <a href="https://maven.apache.org/surefire/maven-surefire-plugin/" target="_blank" class="ferr-card"><span class="ferr-icon">⚙️</span><div class="ferr-title">Maven Surefire Plugin</div><div class="ferr-desc">Execução de testes no build</div><div class="ferr-link">Ver docs ↗</div></a>
+          <a href="https://www.jetbrains.com/idea/download/" target="_blank" class="ferr-card"><span class="ferr-icon">🛠️</span><div class="ferr-title">IntelliJ IDEA Community</div><div class="ferr-desc">IDE gratuita para Java</div><div class="ferr-link">Download ↗</div></a>
+          <a href="https://www.baeldung.com/junit-5" target="_blank" class="ferr-card"><span class="ferr-icon">🎓</span><div class="ferr-title">Baeldung — JUnit 5 Guide</div><div class="ferr-desc">Tutorial prático com exemplos reais</div><div class="ferr-link">Ler guia ↗</div></a>
+        </div>
+      </div>
+    </div>
+    <div class="desafio-box t01">
+      <div class="desafio-header"><span class="desafio-emoji">🎯</span>
+        <div class="desafio-header-text"><h3>Desafio — Suíte para BancoConta</h3><p>Configure o JUnit 5 e escreva testes para todas as operações de uma conta bancária simples.</p></div>
+      </div>
+      <div class="desafio-body">
+        <ul class="desafio-checklist">
+          <li><span class="check-box" onclick="checkItem(this)"></span>Configurar <code>junit-jupiter 5.10+</code> no <code>pom.xml</code> e rodar <code>mvn test</code> com sucesso</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Criar <code>BancoContaTest</code> com <code>@BeforeEach</code> instanciando a conta</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Testar: depositar, sacar, consultar saldo e transferir com valores válidos</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Testar ao menos 1 cenário de erro: saque maior que o saldo</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Todos os métodos com nomenclatura <code>deveX_QuandoY()</code> e padrão AAA comentado</li>
+        </ul>
+        <div class="desafio-entrega"><strong>📦 Entrega</strong>Repositório Git com <code>mvn test</code> rodando 100% verde. Print do relatório do IntelliJ.</div>
+        <div class="criterios-grid">
+          <div class="criterio-chip">✓ pom.xml configurado</div>
+          <div class="criterio-chip">✓ @BeforeEach usado</div>
+          <div class="criterio-chip">✓ 4+ operações testadas</div>
+          <div class="criterio-chip">✓ Cenário de erro coberto</div>
+        </div>
+      </div>
+    </div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Empresas como Nubank, iFood e CI&T exigem cobertura de testes como requisito de merge. Todo PR no GitHub de times profissionais precisa passar no CI antes de ser aprovado. Saber escrever testes é diferencial em qualquer vaga Java Júnior.</p></div></div>
+  </div><!-- /a01 -->
+
+  <!-- ═════════ AULA 02 ═════════ -->
+  <div class="page t02" id="page-a02">
+    <div class="aula-progress">
+      <span class="progress-ring">📖</span>
+      <div class="progress-text"><h4>Aula 02 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div>
+      <button class="btn-complete" id="complete-a02" onclick="markDone('a02')">✓ Marcar como concluída</button>
+    </div>
+    <div class="aula-hero">
+      <div class="aula-hero-eyebrow">Aula 02 · Básico · 4 horas</div>
+      <h1>📊 Assertions Avançadas &amp; @ParameterizedTest</h1>
+      <p>Elimine duplicação de testes com @ParameterizedTest e escreva assertions expressivas que explicam a falha com clareza.</p>
+      <div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">☕ JUnit 5 Jupiter</span><span class="meta-chip">🎯 Básico</span></div>
+    </div>
+    <div class="content-section">
+      <div class="section-header open" onclick="toggle(this)">
+        <span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body open">
+        <ul class="item-list">
+          <li><code>assertThrows(Excecao.class, () -> codigo())</code> — verificar que exceção é lançada</li>
+          <li><code>assertAll("grupo", () -> ..., () -> ...)</code> — verificar múltiplas condições de uma vez</li>
+          <li><code>@ParameterizedTest</code> com <code>@ValueSource</code>, <code>@CsvSource</code> e <code>@MethodSource</code></li>
+          <li><code>@DisplayName</code> — nomes legíveis nos relatórios de CI</li>
+          <li>Eliminar duplicação: substituir 5 @Test idênticos por 1 @ParameterizedTest</li>
+          <li>Boas práticas: mensagem de falha em assertions críticas</li>
+        </ul>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header" onclick="toggle(this)">
+        <span class="section-icon">📋</span><span class="section-label">Roteiro da Aula (4h)</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <ol class="steps-list">
+          <li><span class="step-num">1</span><span><strong>Revisão rápida — 15 min:</strong> revisitar os testes da Aula 01 e identificar código duplicado.</span></li>
+          <li><span class="step-num">2</span><span><strong>Exposição — 35 min:</strong> assertThrows, assertAll e a sintaxe de @ParameterizedTest.</span></li>
+          <li><span class="step-num">3</span><span><strong>Demonstração — 40 min:</strong> refatorar suíte existente substituindo duplicações por @CsvSource.</span></li>
+          <li><span class="step-num">4</span><span><strong>Prática guiada — 70 min:</strong> suíte parametrizada para MathUtils com 5+ casos por operação.</span></li>
+          <li><span class="step-num">5</span><span><strong>Desafio autônomo — 40 min:</strong> cobrir MathUtils com @ParameterizedTest.</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header" onclick="toggle(this)">
+        <span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="ferr-grid">
+          <a href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests" target="_blank" class="ferr-card"><span class="ferr-icon">📖</span><div class="ferr-title">JUnit 5 — @ParameterizedTest</div><div class="ferr-desc">Docs oficiais com todos os exemplos</div><div class="ferr-link">Abrir ↗</div></a>
+          <a href="https://www.baeldung.com/parameterized-tests-junit-5" target="_blank" class="ferr-card"><span class="ferr-icon">🎓</span><div class="ferr-title">Baeldung — Parameterized Tests</div><div class="ferr-desc">Guia prático com exemplos reais</div><div class="ferr-link">Ler ↗</div></a>
+          <a href="https://junit.org/junit5/docs/current/user-guide/#writing-tests-assertions" target="_blank" class="ferr-card"><span class="ferr-icon">✅</span><div class="ferr-title">JUnit 5 — Assertions</div><div class="ferr-desc">assertAll, assertThrows e mais</div><div class="ferr-link">Docs ↗</div></a>
+        </div>
+      </div>
+    </div>
+    <div class="desafio-box t02">
+      <div class="desafio-header"><span class="desafio-emoji">🎯</span>
+        <div class="desafio-header-text"><h3>Desafio — Suíte Parametrizada para MathUtils</h3><p>Cobertura completa com @ParameterizedTest — zero @Test duplicado.</p></div>
+      </div>
+      <div class="desafio-body">
+        <ul class="desafio-checklist">
+          <li><span class="check-box" onclick="checkItem(this)"></span>@CsvSource com ao menos 4 casos em cada operação (+, -, ×, ÷)</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>assertThrows para divisão por zero e raiz de número negativo</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>assertAll para verificar múltiplos campos de um objeto Resultado</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>@DisplayName descritivo em todos os testes</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Zero @Test duplicado — tudo via @ParameterizedTest</li>
+        </ul>
+        <div class="desafio-entrega"><strong>📦 Entrega</strong>Repositório com ao menos 20 casos no total. mvn test verde. Print do relatório com @DisplayNames.</div>
+        <div class="criterios-grid">
+          <div class="criterio-chip">✓ @CsvSource com 4+ casos</div>
+          <div class="criterio-chip">✓ assertThrows nos erros</div>
+          <div class="criterio-chip">✓ assertAll nos objetos</div>
+          <div class="criterio-chip">✓ @DisplayName em todos</div>
+        </div>
+      </div>
+    </div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Times ágeis usam @ParameterizedTest para cobrir regras de negócio com múltiplos cenários sem triplicar o código de teste. Em projetos financeiros, cada regra de cálculo tem dezenas de casos parametrizados que evitam regressões.</p></div></div>
+  </div><!-- /a02 -->
+
+  <!-- ═════════ AULA 03 ═════════ -->
+  <div class="page t03" id="page-a03">
+    <div class="aula-progress">
+      <span class="progress-ring">📖</span>
+      <div class="progress-text"><h4>Aula 03 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div>
+      <button class="btn-complete" id="complete-a03" onclick="markDone('a03')">✓ Marcar como concluída</button>
+    </div>
+    <div class="aula-hero">
+      <div class="aula-hero-eyebrow">Aula 03 · Básico · 4 horas</div>
+      <h1>🔴 TDD — Red Green Refactor</h1>
+      <p>Inverta o fluxo: escreva o teste antes do código. O TDD não é só técnica de teste — é uma técnica de design que produz código mais simples e bem estruturado.</p>
+      <div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">🔴🟢♻️ Ciclo TDD</span><span class="meta-chip">🎯 Básico</span></div>
+    </div>
+    <div class="content-section">
+      <div class="section-header open" onclick="toggle(this)">
+        <span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body open">
+        <ul class="item-list">
+          <li>O ciclo <strong>Red → Green → Refactor</strong>: o que fazer em cada fase</li>
+          <li>Baby steps: por que passos pequenos produzem código melhor</li>
+          <li>Design emergente: como o TDD revela as abstrações corretas</li>
+          <li>Kata FizzBuzz completo documentado por commits</li>
+          <li>Kata String Calculator: ciclos progressivos com novos requisitos</li>
+          <li>Commits semânticos por fase: <code>test: [Red]</code>, <code>feat: [Green]</code>, <code>refactor:</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header" onclick="toggle(this)">
+        <span class="section-icon">📋</span><span class="section-label">Roteiro da Aula (4h)</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <ol class="steps-list">
+          <li><span class="step-num">1</span><span><strong>Exposição — 30 min:</strong> o ciclo TDD animado passo a passo, comparação código TDD vs. código normal.</span></li>
+          <li><span class="step-num">2</span><span><strong>Demo ao vivo — 50 min:</strong> professor implementa FizzBuzz do zero em TDD, commit a commit.</span></li>
+          <li><span class="step-num">3</span><span><strong>Prática guiada — 60 min:</strong> alunos replicam FizzBuzz em seus repositórios seguindo exatamente o mesmo ciclo.</span></li>
+          <li><span class="step-num">4</span><span><strong>Kata autônomo — 50 min:</strong> String Calculator em TDD, sem ver a solução.</span></li>
+          <li><span class="step-num">5</span><span><strong>Retrospectiva — 30 min:</strong> comparar históricos de commits entre equipes.</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="content-section">
+      <div class="section-header" onclick="toggle(this)">
+        <span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body">
+        <div class="ferr-grid">
+          <a href="https://kata-log.rocks/fizz-buzz-kata" target="_blank" class="ferr-card"><span class="ferr-icon">🐸</span><div class="ferr-title">FizzBuzz Kata</div><div class="ferr-desc">Enunciado e variações do kata clássico</div><div class="ferr-link">Ver kata ↗</div></a>
+          <a href="https://kata-log.rocks/string-calculator-kata" target="_blank" class="ferr-card"><span class="ferr-icon">🧮</span><div class="ferr-title">String Calculator Kata</div><div class="ferr-desc">Kata incremental ideal para TDD</div><div class="ferr-link">Ver kata ↗</div></a>
+          <a href="https://www.conventionalcommits.org/pt-br/v1.0.0/" target="_blank" class="ferr-card"><span class="ferr-icon">📝</span><div class="ferr-title">Conventional Commits</div><div class="ferr-desc">Padrão de commits usado no TDD</div><div class="ferr-link">Ver padrão ↗</div></a>
+        </div>
+      </div>
+    </div>
+    <div class="desafio-box t03">
+      <div class="desafio-header"><span class="desafio-emoji">🎯</span>
+        <div class="desafio-header-text"><h3>Desafio — Kata Bowling Game em TDD</h3><p>Implemente o placar do Bowling inteiramente em TDD. Cada commit = uma fase do ciclo.</p></div>
+      </div>
+      <div class="desafio-body">
+        <ul class="desafio-checklist">
+          <li><span class="check-box" onclick="checkItem(this)"></span>Ao menos 6 ciclos Red-Green-Refactor completos e visíveis no git log</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Commits com prefixo <code>test: [Red]</code>, <code>feat: [Green]</code>, <code>refactor:</code></li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Cenários cobertos: bola normal, spare, strike e jogo perfeito (300)</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>Código refatorado pelo menos 1 vez após atingir o verde</li>
+          <li><span class="check-box" onclick="checkItem(this)"></span>mvn test 100% verde no commit final</li>
+        </ul>
+        <div class="desafio-entrega"><strong>📦 Entrega</strong>Repositório com histórico TDD visível. Link para o repositório no GitHub.</div>
+        <div class="criterios-grid">
+          <div class="criterio-chip">✓ 6+ ciclos no git log</div>
+          <div class="criterio-chip">✓ Commits Red/Green/Refactor</div>
+          <div class="criterio-chip">✓ Strike e spare testados</div>
+          <div class="criterio-chip">✓ Jogo perfeito coberto</div>
+        </div>
+      </div>
+    </div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Equipes de XP (Extreme Programming) e muitos times ágeis em startups como Creditas e Conta Simples praticam TDD como parte do workflow diário. Desenvolvedores que sabem TDD são valorizados por entregar código com menos regressões.</p></div></div>
+  </div><!-- /a03 -->
+
+  <!-- ═════════ AULAS 04-15: cards de visão geral + desafio ═════════ -->
+
+  <!-- AULA 04 -->
+  <div class="page t04" id="page-a04">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 04 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a04" onclick="markDone('a04')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 04 · Intermediário · 4 horas</div><h1>🎭 Mockito — Mocks e Stubs em Java</h1><p>Isole a lógica de negócio das dependências externas. Teste serviços sem banco de dados, sem e-mail real e sem APIs pagas.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">☕ Mockito 5</span><span class="meta-chip">🎯 Intermediário</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li><code>@ExtendWith(MockitoExtension.class)</code>, <code>@Mock</code>, <code>@InjectMocks</code></li><li><code>when(mock.metodo()).thenReturn(valor)</code> e <code>thenThrow()</code></li><li><code>verify(mock, times(n)).metodo()</code> e <code>never()</code></li><li><code>ArgumentCaptor</code>: capturar objetos criados internamente</li><li><code>ArgumentMatchers</code>: <code>any()</code>, <code>anyLong()</code>, <code>eq()</code>, <code>argThat()</code></li><li><code>@Spy</code>: mock parcial que chama a implementação real</li><li>Boas práticas: o que mockar e o que não mockar</li></ul></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">📋</span><span class="section-label">Roteiro da Aula (4h)</span><span class="section-chevron">▼</span></div><div class="section-body"><ol class="steps-list"><li><span class="step-num">1</span><span><strong>Problema sem mock — 20 min:</strong> mostrar teste quebrando por depender do banco; motivar o mock.</span></li><li><span class="step-num">2</span><span><strong>Exposição + demo — 50 min:</strong> configurar Mockito, when/thenReturn, verify ao vivo.</span></li><li><span class="step-num">3</span><span><strong>Prática guiada — 70 min:</strong> PedidoService com mocks de repository, email e estoque.</span></li><li><span class="step-num">4</span><span><strong>Desafio autônomo — 50 min:</strong> AlunoService com todas as dependências mockadas.</span></li><li><span class="step-num">5</span><span><strong>Discussão — 30 min:</strong> over-mocking e quando usar @Spy.</span></li></ol></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span></div><div class="section-body"><div class="ferr-grid"><a href="https://site.mockito.org/" target="_blank" class="ferr-card"><span class="ferr-icon">📖</span><div class="ferr-title">Mockito Official Docs</div><div class="ferr-desc">Referência completa da API</div><div class="ferr-link">Abrir ↗</div></a><a href="https://www.baeldung.com/mockito-series" target="_blank" class="ferr-card"><span class="ferr-icon">🎓</span><div class="ferr-title">Baeldung — Mockito Series</div><div class="ferr-desc">12 artigos do básico ao avançado</div><div class="ferr-link">Ler ↗</div></a><a href="https://www.baeldung.com/mockito-argument-captor" target="_blank" class="ferr-card"><span class="ferr-icon">🔍</span><div class="ferr-title">ArgumentCaptor — Baeldung</div><div class="ferr-desc">Capturar argumentos em detalhes</div><div class="ferr-link">Ler ↗</div></a></div></div></div>
+    <div class="desafio-box t04"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Testar AlunoService com Dependências Mockadas</h3><p>Teste toda a lógica sem banco real, sem e-mail real e sem nenhuma infra externa.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>@Mock para AlunoRepository, EmailService e AuditService</li><li><span class="check-box" onclick="checkItem(this)"></span>when/thenReturn para o happy path de buscar, cadastrar e atualizar</li><li><span class="check-box" onclick="checkItem(this)"></span>thenThrow para simular AlunoNaoEncontradoException</li><li><span class="check-box" onclick="checkItem(this)"></span>verify que o repositório salvou exatamente 1 vez</li><li><span class="check-box" onclick="checkItem(this)"></span>ArgumentCaptor verificando que o status do aluno criado é "ATIVO"</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Repositório com testes para os 3 cenários. mvn test 100% verde.</div><div class="criterios-grid"><div class="criterio-chip">✓ 3 mocks configurados</div><div class="criterio-chip">✓ Happy path testado</div><div class="criterio-chip">✓ Erro simulado</div><div class="criterio-chip">✓ ArgumentCaptor usado</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Mockito é a biblioteca de mocks mais usada em Java — presente em praticamente todos os projetos Spring Boot corporativos. Saber configurar mocks é requisito em qualquer entrevista técnica para vagas backend Java.</p></div></div>
+  </div><!-- /a04 -->
+
+  <!-- AULA 05 -->
+  <div class="page t05" id="page-a05">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 05 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a05" onclick="markDone('a05')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 05 · Intermediário · 4 horas</div><h1>🌱 Spring Boot Test &amp; MockMvc</h1><p>Teste os endpoints REST do seu projeto sem subir um servidor real. @WebMvcTest isola o Controller e o MockMvc simula as requisições HTTP.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">🌱 Spring Boot Test</span><span class="meta-chip">🎯 Intermediário</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li><code>@WebMvcTest(Controller.class)</code> + <code>@MockBean</code> para o service</li><li><code>MockMvc</code>: <code>perform(get("/rota"))</code>, <code>andExpect(status().isOk())</code></li><li><code>jsonPath("$.campo").value("valor")</code>: assertions no corpo JSON</li><li><code>@DataJpaTest</code>: testar repositórios JPA com H2 in-memory</li><li><code>@SpringBootTest(RANDOM_PORT)</code> + <code>TestRestTemplate</code>: integração completa</li><li><code>@Sql("/dados.sql")</code>: carregar fixtures antes dos testes</li><li>Status codes: 200, 201, 400, 404, 422 — verificar todos</li></ul></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">📋</span><span class="section-label">Roteiro da Aula (4h)</span><span class="section-chevron">▼</span></div><div class="section-body"><ol class="steps-list"><li><span class="step-num">1</span><span><strong>Contexto — 25 min:</strong> unitário vs. integração, quando usar cada anotação do Spring.</span></li><li><span class="step-num">2</span><span><strong>Demo @WebMvcTest — 50 min:</strong> testar GET, POST, 404 ao vivo com jsonPath.</span></li><li><span class="step-num">3</span><span><strong>Prática guiada — 70 min:</strong> cobrir AlunoController com @WebMvcTest + MockMvc.</span></li><li><span class="step-num">4</span><span><strong>@DataJpaTest — 30 min:</strong> testar queries customizadas no repositório.</span></li><li><span class="step-num">5</span><span><strong>Desafio autônomo — 45 min:</strong> cobrir CRUD completo.</span></li></ol></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span></div><div class="section-body"><div class="ferr-grid"><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/test-auto-configuration.html" target="_blank" class="ferr-card"><span class="ferr-icon">🌱</span><div class="ferr-title">Spring Boot Test Docs</div><div class="ferr-desc">Todas as anotações de teste</div><div class="ferr-link">Docs ↗</div></a><a href="https://www.baeldung.com/spring-boot-testing" target="_blank" class="ferr-card"><span class="ferr-icon">🎓</span><div class="ferr-title">Baeldung — Spring Boot Testing</div><div class="ferr-desc">Guia completo com exemplos</div><div class="ferr-link">Ler ↗</div></a><a href="https://jsonpath.com/" target="_blank" class="ferr-card"><span class="ferr-icon">🔍</span><div class="ferr-title">JSONPath Evaluator</div><div class="ferr-desc">Testar suas expressões jsonPath</div><div class="ferr-link">Abrir ↗</div></a></div></div></div>
+    <div class="desafio-box t05"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — CRUD Completo com MockMvc</h3><p>Teste todos os endpoints do AlunoController: sucesso e erro para cada método HTTP.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>GET /alunos → 200 + array JSON com jsonPath</li><li><span class="check-box" onclick="checkItem(this)"></span>GET /alunos/1 → 200 + nome correto em jsonPath("$.nome")</li><li><span class="check-box" onclick="checkItem(this)"></span>POST /alunos com body JSON → 201 Created</li><li><span class="check-box" onclick="checkItem(this)"></span>PUT /alunos/1 → 200 e DELETE /alunos/1 → 204</li><li><span class="check-box" onclick="checkItem(this)"></span>GET /alunos/99 → 404 Not Found</li><li><span class="check-box" onclick="checkItem(this)"></span>@DataJpaTest: findByNome retorna 1 resultado após save</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Repositório com os 2 arquivos de teste. mvn test verde. Print mostrando os @DisplayNames no relatório.</div><div class="criterios-grid"><div class="criterio-chip">✓ CRUD coberto</div><div class="criterio-chip">✓ Status codes verificados</div><div class="criterio-chip">✓ jsonPath no corpo</div><div class="criterio-chip">✓ @DataJpaTest configurado</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Spring Boot Test é o padrão de testes em >90% das empresas que usam Java no Brasil. @WebMvcTest é especificamente cobrado em testes técnicos de empresas como Itaú, Totvs e Softplan.</p></div></div>
+  </div><!-- /a05 -->
+
+  <!-- AULAS 06-15: formato condensado com conteúdo essencial -->
+
+  <!-- helper macro para aulas 06-15 -->
+  <!-- AULA 06 -->
+  <div class="page t06" id="page-a06">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 06 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a06" onclick="markDone('a06')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 06 · Intermediário · 4 horas</div><h1>📈 JaCoCo — Cobertura de Código</h1><p>Meça a qualidade dos seus testes com dados reais. Configure thresholds no CI para que cobertura abaixo de 80% quebre a build automaticamente.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">📊 JaCoCo 0.8+</span><span class="meta-chip">🎯 Intermediário</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>Line coverage vs. branch coverage vs. method coverage — diferenças e usos</li><li>Configurar <code>jacoco-maven-plugin</code> com goals <code>prepare-agent</code> e <code>report</code></li><li>Ler o relatório HTML: linhas verdes, amarelas (branch parcial) e vermelhas</li><li>Threshold de build: falhar se line coverage &lt; 80% ou branch &lt; 75%</li><li>Excluir classes da análise: DTOs, configs, Application.class</li><li>JaCoCo no Gradle e publicar relatório como comentário no PR (GitHub Actions)</li></ul></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span></div><div class="section-body"><div class="ferr-grid"><a href="https://www.jacoco.org/jacoco/trunk/doc/maven.html" target="_blank" class="ferr-card"><span class="ferr-icon">📖</span><div class="ferr-title">JaCoCo Maven Plugin</div><div class="ferr-desc">Referência oficial de configuração</div><div class="ferr-link">Docs ↗</div></a><a href="https://www.baeldung.com/jacoco" target="_blank" class="ferr-card"><span class="ferr-icon">🎓</span><div class="ferr-title">Baeldung — JaCoCo Guide</div><div class="ferr-desc">Passo a passo com exemplos reais</div><div class="ferr-link">Ler ↗</div></a><a href="https://github.com/madrapenos/jacoco-report" target="_blank" class="ferr-card"><span class="ferr-icon">💬</span><div class="ferr-title">jacoco-report (GitHub Action)</div><div class="ferr-desc">Comentar cobertura automaticamente no PR</div><div class="ferr-link">Ver ↗</div></a></div></div></div>
+    <div class="desafio-box t06"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — JaCoCo com Threshold 80% no CI</h3><p>Configure o JaCoCo no projeto e integre ao GitHub Actions para bloquear PRs com cobertura insuficiente.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>Plugin JaCoCo no pom.xml com prepare-agent e report</li><li><span class="check-box" onclick="checkItem(this)"></span>Threshold: line ≥ 80% e branch ≥ 75% quebrando a build</li><li><span class="check-box" onclick="checkItem(this)"></span>Exclusões: dto/**, config/**, Application.class</li><li><span class="check-box" onclick="checkItem(this)"></span>Relatório HTML gerado em target/site/jacoco/</li><li><span class="check-box" onclick="checkItem(this)"></span>GitHub Actions publicando o relatório como comentário no PR</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>pom.xml com JaCoCo completo + workflow do GitHub Actions. Screenshot do comentário de cobertura no PR.</div><div class="criterios-grid"><div class="criterio-chip">✓ JaCoCo no pom.xml</div><div class="criterio-chip">✓ Threshold line ≥ 80%</div><div class="criterio-chip">✓ Branch ≥ 75%</div><div class="criterio-chip">✓ CI comentando no PR</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>JaCoCo é padrão em projetos Java enterprise. Times que adotam quality gates no SonarQube + JaCoCo reduzem regressões em até 40%. É requisito em contratações de empresas como TOTVS e Stefanini.</p></div></div>
+  </div><!-- /a06 -->
+
+  <!-- AULA 07 -->
+  <div class="page t07" id="page-a07">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 07 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a07" onclick="markDone('a07')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 07 · Avançado · 4 horas</div><h1>☢️ Mutation Testing com PIT</h1><p>100% de cobertura não garante qualidade. O PIT injeta bugs reais no seu código e verifica se seus testes os detectam — o mutation score revela a verdade.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">☢️ PIT 1.15+</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>O problema: 100% de line coverage com assertions inúteis</li><li>O que é um mutante: Conditional Boundary, Negate, Return Values, Void Calls</li><li>Mutation score = mortos/total × 100 — meta: ≥ 75%</li><li>Configurar <code>pitest-maven</code> com <code>pitest-junit5-plugin</code></li><li>Rodar <code>mvn pitest:mutationCoverage</code> e ler o relatório HTML</li><li>Matar mutantes sobreviventes: escrever testes de boundary (7.0 vs 7.01)</li><li>Configurar <code>mutationThreshold</code> para falhar o build</li></ul></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">🔗</span><span class="section-label">Ferramentas e Recursos</span><span class="section-chevron">▼</span></div><div class="section-body"><div class="ferr-grid"><a href="https://pitest.org/" target="_blank" class="ferr-card"><span class="ferr-icon">☢️</span><div class="ferr-title">PIT — Mutation Testing</div><div class="ferr-desc">Site oficial com docs e exemplos</div><div class="ferr-link">pitest.org ↗</div></a><a href="https://www.baeldung.com/java-mutation-testing-with-pitest" target="_blank" class="ferr-card"><span class="ferr-icon">🎓</span><div class="ferr-title">Baeldung — Mutation Testing</div><div class="ferr-desc">Guia completo de PIT com Maven</div><div class="ferr-link">Ler ↗</div></a></div></div></div>
+    <div class="desafio-box t07"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Elevar Mutation Score de &lt;40% para &gt;75%</h3><p>O módulo de classificação de notas tem cobertura de 95% mas mutation score de 38%. Corrija isso.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>Instalar e configurar PIT com pitest-junit5-plugin</li><li><span class="check-box" onclick="checkItem(this)"></span>Rodar análise e documentar score inicial (&lt;40%)</li><li><span class="check-box" onclick="checkItem(this)"></span>Escrever testes de boundary para cada comparação: nota == 7.0, nota == 5.0</li><li><span class="check-box" onclick="checkItem(this)"></span>Score final ≥ 75% comprovado pelo relatório HTML</li><li><span class="check-box" onclick="checkItem(this)"></span>mutationThreshold 75 no pom.xml</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Relatório HTML antes e depois. pom.xml com threshold. Score ≥ 75% no build final.</div><div class="criterios-grid"><div class="criterio-chip">✓ PIT configurado</div><div class="criterio-chip">✓ Score inicial documentado</div><div class="criterio-chip">✓ Score final ≥ 75%</div><div class="criterio-chip">✓ Boundary cases cobertos</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Mutation testing é usado em sistemas críticos — bancos, fintechs e healthtechs onde um bug financeiro ou médico custa muito. Empresas como Goldman Sachs e hospital networks exigem mutation score mínimo em módulos críticos.</p></div></div>
+  </div><!-- /a07 -->
+
+  <!-- AULAS 08-13: cards compactos com desafio -->
+  <!-- AULA 08 -->
+  <div class="page t08" id="page-a08">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 08 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a08" onclick="markDone('a08')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 08 · Avançado · 4 horas</div><h1>⚡ JMH — Testes de Performance</h1><p>Microbenchmarks precisos para Java. JMH controla JIT, GC e warmup — sem ele, seus benchmarks medem coisas erradas.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">⚡ JMH 1.37</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li><code>@Benchmark</code>, <code>@BenchmarkMode</code>: Throughput, AverageTime, SampleTime</li><li><code>@Warmup</code> e <code>@Measurement</code>: controlar iterações</li><li><code>@Param</code>: testar com diferentes tamanhos de input</li><li>Comparar duas implementações do mesmo algoritmo</li><li><code>@State</code>: compartilhar estado entre benchmarks sem interferência</li><li>Interpretar resultados: ops/s, ns/op, erro de margem</li></ul></div></div>
+    <div class="desafio-box t08"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Benchmark de Ordenação</h3><p>Compare ArrayList vs. LinkedList para inserção e busca com @Param(sizes).</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>Projeto JMH configurado com @BenchmarkMode(AverageTime)</li><li><span class="check-box" onclick="checkItem(this)"></span>@Param com sizes: 100, 1000, 10000</li><li><span class="check-box" onclick="checkItem(this)"></span>Benchmarks para ArrayList e LinkedList comparados</li><li><span class="check-box" onclick="checkItem(this)"></span>Relatório JSON gerado e interpretado</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Projeto JMH + screenshot do resultado com análise escrita.</div><div class="criterios-grid"><div class="criterio-chip">✓ @Benchmark configurado</div><div class="criterio-chip">✓ @Param com 3+ tamanhos</div><div class="criterio-chip">✓ Duas implementações</div><div class="criterio-chip">✓ Análise documentada</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>JMH é desenvolvido pelo time de JVM da Oracle. Equipes de plataforma em grandes sistemas usam JMH para justificar decisões de otimização com dados — não com intuição.</p></div></div>
+  </div><!-- /a08 -->
+
+  <!-- AULA 09 -->
+  <div class="page t09" id="page-a09">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 09 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a09" onclick="markDone('a09')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 09 · Avançado · 4 horas</div><h1>🌐 RestAssured — Testes de API REST</h1><p>Teste APIs REST com a sintaxe mais expressiva do ecossistema Java: given/when/then que lê como especificação de comportamento.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">🌐 RestAssured 5</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>Sintaxe fluente: <code>given().when().get("/rota").then().statusCode(200)</code></li><li>jsonPath assertions: <code>body("lista[0].nome", equalTo("Ana"))</code></li><li>POST com body: <code>contentType(JSON).body(objeto)</code></li><li>Autenticação: Bearer token, Basic Auth, OAuth2</li><li>Schema validation com JSON Schema</li><li>Reutilização com RequestSpecification</li></ul></div></div>
+    <div class="desafio-box t09"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — CRUD Completo com RestAssured</h3><p>Teste todos os endpoints da API de alunos com given/when/then.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>GET, POST, PUT, DELETE testados com given/when/then</li><li><span class="check-box" onclick="checkItem(this)"></span>jsonPath verificando campos do response body</li><li><span class="check-box" onclick="checkItem(this)"></span>Status codes: 200, 201, 204, 404 verificados</li><li><span class="check-box" onclick="checkItem(this)"></span>RequestSpecification reutilizando base URL e header</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Classe de testes RestAssured com CRUD coberto. mvn test verde.</div><div class="criterios-grid"><div class="criterio-chip">✓ given/when/then</div><div class="criterio-chip">✓ jsonPath assertions</div><div class="criterio-chip">✓ 4 métodos HTTP</div><div class="criterio-chip">✓ Status codes corretos</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>RestAssured é a ferramenta de testes de API mais usada em equipes Java. É cobrada em entrevistas de QA Java e em times de backend que escrevem testes de contract.</p></div></div>
+  </div><!-- /a09 -->
+
+  <!-- AULA 10 -->
+  <div class="page t10" id="page-a10">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 10 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a10" onclick="markDone('a10')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 10 · Avançado · 4 horas</div><h1>📋 Pact JVM — Testes de Contrato</h1><p>Consumer-driven contracts: o consumidor define o que espera da API e o provider prova que entrega. Evita que microsserviços quebrem silenciosamente.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">📋 Pact JVM</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>Consumer-driven contracts: quem define o contrato?</li><li>Consumer: escrever o Pact test e gerar o arquivo .json</li><li>Provider: verificar o contrato com <code>@Provider</code> e <code>@PactVerification</code></li><li>Pact Broker: centralizar e versionar os contratos</li><li>Integrar ao CI: consumer publica, provider verifica</li><li>Quando usar: integração entre microsserviços com equipes independentes</li></ul></div></div>
+    <div class="desafio-box t10"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Contrato Consumer-Provider para API de Alunos</h3><p>Defina o contrato no consumer, gere o pact file e verifique no provider.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>Consumer test: definir que GET /alunos/1 retorna {id, nome, email}</li><li><span class="check-box" onclick="checkItem(this)"></span>Gerar arquivo pact .json no consumer</li><li><span class="check-box" onclick="checkItem(this)"></span>Provider test: verificar que a implementação satisfaz o contrato</li><li><span class="check-box" onclick="checkItem(this)"></span>Pact Broker (local com Docker) publicando e exibindo o contrato</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Dois projetos Maven (consumer + provider) com os testes. Screenshot do Pact Broker.</div><div class="criterios-grid"><div class="criterio-chip">✓ Consumer pact gerado</div><div class="criterio-chip">✓ Provider verificado</div><div class="criterio-chip">✓ Pact Broker funcionando</div><div class="criterio-chip">✓ CI integrado</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Contratos Pact são usados por times de microsserviços em empresas como ThoughtWorks, Nubank e Gympass para garantir compatibilidade entre serviços independentes sem depender de testes E2E lentos.</p></div></div>
+  </div><!-- /a10 -->
+
+  <!-- AULA 11 -->
+  <div class="page t11" id="page-a11">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 11 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a11" onclick="markDone('a11')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 11 · Avançado · 4 horas</div><h1>📉 Gatling — Testes de Carga</h1><p>Descubra onde o sistema quebra antes que os usuários reais encontrem. Gatling simula centenas de usuários e gera relatórios HTML detalhados com métricas p95 e p99.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">📉 Gatling 3</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>Load test, stress test, soak test, spike test — quando usar cada um</li><li>Estrutura de uma Simulation: <code>scenario</code>, <code>exec</code>, <code>pause</code></li><li>Ramp-up: <code>rampUsers(100).during(30)</code></li><li>Assertions: <code>global.responseTime.percentile3.lt(500)</code> (p95 &lt; 500ms)</li><li>Feeders CSV: injetar dados dinâmicos nos requests</li><li>Relatório HTML: throughput, latência, erros por endpoint</li></ul></div></div>
+    <div class="desafio-box t11"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Simulação de Carga com SLA</h3><p>50 usuários simultâneos, ramp-up de 30s, p95 &lt; 500ms. Identifique o gargalo.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>Simulation configurada com rampUsers(50).during(30 seconds)</li><li><span class="check-box" onclick="checkItem(this)"></span>Assertion: responseTime.percentile3.lt(500)</li><li><span class="check-box" onclick="checkItem(this)"></span>Feeder CSV com 10 IDs de alunos diferentes</li><li><span class="check-box" onclick="checkItem(this)"></span>Relatório HTML gerado e gargalo identificado em PERFORMANCE.md</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Projeto Gatling + relatório HTML + PERFORMANCE.md com análise.</div><div class="criterios-grid"><div class="criterio-chip">✓ Simulation com ramp-up</div><div class="criterio-chip">✓ SLA assertion p95</div><div class="criterio-chip">✓ Feeder CSV</div><div class="criterio-chip">✓ Gargalo documentado</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Gatling é a ferramenta de carga padrão em projetos Java. É especificamente integrado ao Maven e ao CI. Times de plataforma em e-commerces testam com Gatling antes de cada Black Friday.</p></div></div>
+  </div><!-- /a11 -->
+
+  <!-- AULA 12 -->
+  <div class="page t12" id="page-a12">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 12 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a12" onclick="markDone('a12')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 12 · Avançado · 4 horas</div><h1>🔒 Segurança — OWASP &amp; Java</h1><p>Detecte vulnerabilidades no código e nas dependências antes que atacantes as encontrem. OWASP Dependency-Check e SpotBugs são suas ferramentas de linha de defesa.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">🔒 OWASP Top 10</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>OWASP Top 10 e os 3 mais críticos em Java: Injection, Broken Auth, Insecure Deserialization</li><li><code>dependency-check-maven</code>: escanear CVEs nas dependências</li><li>SpotBugs + Find Security Bugs: SAST no bytecode Java</li><li>Testar SQL Injection com queries parametrizadas</li><li>Testar XSS prevention: escapar output no template</li><li>Integrar ao CI: build falha se CVE crítico encontrado</li></ul></div></div>
+    <div class="desafio-box t12"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Relatório de Segurança Completo</h3><p>Auditoria completa: dependências vulneráveis, código estático e testes de proteção contra SQL Injection.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>dependency-check configurado — relatório HTML gerado</li><li><span class="check-box" onclick="checkItem(this)"></span>SpotBugs + Find Security Bugs rodando sem issue crítico</li><li><span class="check-box" onclick="checkItem(this)"></span>Teste unitário: query parametrizada protege contra SQL Injection</li><li><span class="check-box" onclick="checkItem(this)"></span>SECURITY.md documentando vulnerabilidades encontradas e remediações</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>pom.xml com plugins + SECURITY.md com análise + print dos relatórios.</div><div class="criterios-grid"><div class="criterio-chip">✓ Dep-Check rodando</div><div class="criterio-chip">✓ SpotBugs configurado</div><div class="criterio-chip">✓ SQL Injection testado</div><div class="criterio-chip">✓ SECURITY.md completo</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>LGPD e normas como ISO 27001 exigem análise de vulnerabilidades. Bancos e fintechs como Inter e C6 Bank auditam dependências automaticamente em cada build. OWASP Dependency-Check é gratuito e integra ao Maven em minutos.</p></div></div>
+  </div><!-- /a12 -->
+
+  <!-- AULA 13 -->
+  <div class="page t13" id="page-a13">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 13 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a13" onclick="markDone('a13')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 13 · Avançado · 4 horas</div><h1>🏛️ ArchUnit — Testes de Arquitetura</h1><p>Escreva as regras de arquitetura como código Java e execute no CI. Ninguém mais vai importar Repository direto no Controller sem que o build quebre.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">🏛️ ArchUnit 1.3</span><span class="meta-chip">🎯 Avançado</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que você vai aprender</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li><code>layeredArchitecture()</code>: Controller → Service → Repository — sem pular camadas</li><li>Controllers não acessam Repository diretamente</li><li>Entidades JPA não usam <code>@Autowired</code></li><li>Naming conventions: classes em <code>service/</code> devem terminar em <code>Service</code></li><li>Dependências proibidas: pacote <code>legacy</code> não pode ser importado em novos pacotes</li><li>Integrar ao CI: ArchUnit falha o build em violações</li></ul></div></div>
+    <div class="desafio-box t13"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — 5 Regras de Arquitetura em ArchUnit</h3><p>Escreva testes que garantem a arquitetura do projeto e integre ao CI.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>Regra de camadas: Controller → Service → Repository</li><li><span class="check-box" onclick="checkItem(this)"></span>Controllers não importam nada de <code>repository/</code></li><li><span class="check-box" onclick="checkItem(this)"></span>Classes em <code>service/</code> devem ter nome terminando em <code>Service</code></li><li><span class="check-box" onclick="checkItem(this)"></span>Entidades não têm <code>@Autowired</code></li><li><span class="check-box" onclick="checkItem(this)"></span>Build falha ao introduzir violação intencional</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Classe ArchUnitTest + print do build falhando ao violar uma regra.</div><div class="criterios-grid"><div class="criterio-chip">✓ Regra de camadas</div><div class="criterio-chip">✓ Naming convention</div><div class="criterio-chip">✓ Dependência proibida</div><div class="criterio-chip">✓ Violação detectada</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>ArchUnit é amplamente adotado em projetos corporativos Spring Boot para manter a arquitetura limpa ao longo do tempo. Times que crescem rápido usam ArchUnit para garantir que novas pessoas não violem decisões de design.</p></div></div>
+  </div><!-- /a13 -->
+
+  <!-- AULA 14 -->
+  <div class="page t14" id="page-a14">
+    <div class="aula-progress"><span class="progress-ring">📖</span><div class="progress-text"><h4>Aula 14 de 15</h4><p>Marque como concluída ao terminar o desafio</p></div><button class="btn-complete" id="complete-a14" onclick="markDone('a14')">✓ Marcar como concluída</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 14 · Integrador · 4 horas</div><h1>🔨 Projeto Integrador — Desenvolvimento</h1><p>Aplique tudo numa API Java real em equipe. Código documentado, testes em todas as camadas, JaCoCo ≥ 70% e pipeline CI/CD verde antes da apresentação.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">👥 Equipes de 3–4</span><span class="meta-chip">🎯 Integrador</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">💡</span><span class="section-label">O que esta aula consolida</span><span class="section-chevron">▼</span></div><div class="section-body open"><ul class="item-list"><li>API Spring Boot com ≥ 5 endpoints CRUD e autenticação JWT</li><li>Testes unitários com JUnit 5 + Mockito (services e regras de negócio)</li><li>Testes de integração com @WebMvcTest + MockMvc (controllers)</li><li>JaCoCo configurado: cobertura ≥ 70% como requisito de merge</li><li>GitHub Actions: lint, testes, JaCoCo e build em cada PR</li><li>Code review cruzado entre equipes com ao menos 3 comentários técnicos</li></ul></div></div>
+    <div class="desafio-box t14"><div class="desafio-header"><span class="desafio-emoji">🎯</span><div class="desafio-header-text"><h3>Desafio — Repositório com Código, Testes e CI Verde</h3><p>Entregue a base do projeto integrador pronta para a apresentação da Aula 15.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>API com 5 endpoints funcionais, documentados com Javadoc</li><li><span class="check-box" onclick="checkItem(this)"></span>Testes unitários (Mockito) + integração (MockMvc) com cobertura ≥ 70%</li><li><span class="check-box" onclick="checkItem(this)"></span>JaCoCo relatório gerado e threshold configurado no pom.xml</li><li><span class="check-box" onclick="checkItem(this)"></span>GitHub Actions com CI verde em todos os commits da main</li><li><span class="check-box" onclick="checkItem(this)"></span>PR de outra equipe revisado com ≥ 3 comentários técnicos</li></ul><div class="desafio-entrega"><strong>📦 Entrega</strong>Repositório GitHub com CI verde + relatório JaCoCo + PR revisado. Base para a apresentação final.</div><div class="criterios-grid"><div class="criterio-chip">✓ 5 endpoints funcionais</div><div class="criterio-chip">✓ Cobertura ≥ 70%</div><div class="criterio-chip">✓ CI verde</div><div class="criterio-chip">✓ PR revisado</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🌐</span><div><h4>Conexão com o Mundo do Trabalho</h4><p>Este projeto representa exatamente o que empresas pedem em testes técnicos: uma API Java testada, com CI configurado e code review documentado. Publique no GitHub e use no LinkedIn — é o seu portfólio backend Java.</p></div></div>
+  </div><!-- /a14 -->
+
+  <!-- AULA 15 -->
+  <div class="page t15" id="page-a15">
+    <div class="aula-progress"><span class="progress-ring">🎓</span><div class="progress-text"><h4>Aula 15 de 15 — A última!</h4><p>Apresente, defenda e celebre o aprendizado.</p></div><button class="btn-complete" id="complete-a15" onclick="markDone('a15')">🎉 Concluir o Curso!</button></div>
+    <div class="aula-hero"><div class="aula-hero-eyebrow">Aula 15 · Integrador · 20 min por equipe</div><h1>🎓 Apresentação e Retrospectiva Final</h1><p>Demonstração ao vivo, defesa das decisões técnicas e retrospectiva coletiva. O encerramento de uma jornada que transformou a forma de escrever código.</p><div class="aula-meta-row"><span class="meta-chip">⏱️ 4 horas</span><span class="meta-chip">🎤 20 min/equipe</span><span class="meta-chip">🎯 Defesa técnica</span></div></div>
+    <div class="content-section"><div class="section-header open" onclick="toggle(this)"><span class="section-icon">📋</span><span class="section-label">Roteiro da Apresentação (20 min/equipe)</span><span class="section-chevron">▼</span></div><div class="section-body open"><ol class="steps-list"><li><span class="step-num">1</span><span><strong>Demo ao vivo — 5 min:</strong> abrir o repositório, mostrar GitHub Actions verde, abrir relatório JaCoCo.</span></li><li><span class="step-num">2</span><span><strong>Demonstrar a API — 4 min:</strong> subir o servidor e executar os endpoints mais importantes.</span></li><li><span class="step-num">3</span><span><strong>Mostrar os testes — 3 min:</strong> rodar mvn test no terminal ao vivo e mostrar a cobertura.</span></li><li><span class="step-num">4</span><span><strong>Decisões técnicas — 4 min:</strong> por que escolheram essa abordagem de testes? O que foi difícil?</span></li><li><span class="step-num">5</span><span><strong>Perguntas — 4 min:</strong> turma e professora fazem perguntas técnicas sobre as escolhas.</span></li></ol></div></div>
+    <div class="content-section"><div class="section-header" onclick="toggle(this)"><span class="section-icon">📊</span><span class="section-label">Rubrica de Avaliação</span><span class="section-chevron">▼</span></div><div class="section-body"><ul class="item-list"><li><strong>Código e testes (30%):</strong> funciona, testa regras de negócio, não só happy path</li><li><strong>Cobertura JaCoCo (25%):</strong> ≥ 70% linha e branch, relatório gerado</li><li><strong>CI/CD (20%):</strong> pipeline verde, threshold configurado, PR com review</li><li><strong>Defesa técnica (15%):</strong> justificar escolhas com argumentos técnicos</li><li><strong>Apresentação (10%):</strong> clareza, organização, todos participam</li></ul></div></div>
+    <div class="desafio-box t15"><div class="desafio-header"><span class="desafio-emoji">🏁</span><div class="desafio-header-text"><h3>Checklist Final — Antes de Apresentar</h3><p>Verifique tudo antes de subir na frente da turma.</p></div></div><div class="desafio-body"><ul class="desafio-checklist"><li><span class="check-box" onclick="checkItem(this)"></span>README completo com instruções de como rodar os testes localmente</li><li><span class="check-box" onclick="checkItem(this)"></span>mvn test verde no terminal (zerar antes de apresentar)</li><li><span class="check-box" onclick="checkItem(this)"></span>Relatório JaCoCo aberto no navegador mostrando cobertura ≥ 70%</li><li><span class="check-box" onclick="checkItem(this)"></span>GitHub Actions verde no último commit da main</li><li><span class="check-box" onclick="checkItem(this)"></span>API rodando e respondendo nos endpoints principais</li><li><span class="check-box" onclick="checkItem(this)"></span>Cada membro da equipe sabe explicar ao menos 1 decisão técnica</li></ul><div class="desafio-entrega"><strong>📦 Entrega Final</strong>Repositório GitHub com tag v1.0.0 criada. Link enviado antes da aula.</div><div class="criterios-grid"><div class="criterio-chip">✓ Tag v1.0.0 criada</div><div class="criterio-chip">✓ README completo</div><div class="criterio-chip">✓ CI verde na main</div><div class="criterio-chip">✓ Demo ao vivo pronta</div></div></div></div>
+    <div class="mundo-box"><span class="mundo-icon">🚀</span><div><h4>Próximos Passos na Carreira</h4><p>Com este curso você domina a cultura de qualidade que diferencia profissionais sênior. Próximos passos: certificação ISTQB Foundation, contribuir para projetos open-source com Java, e aprofundar em Testcontainers para testes de integração com banco real.</p></div></div>
+  </div><!-- /a15 -->
+
+</div><!-- /main -->
+
+<script>
+const PAGES = ['home','a01','a02','a03','a04','a05','a06','a07','a08','a09','a10','a11','a12','a13','a14','a15'];
+const PAGE_LABELS = {
+  home:'Visão Geral',
+  a01:'Aula 01 — JUnit 5 & Primeiro Teste',
+  a02:'Aula 02 — Assertions & @ParameterizedTest',
+  a03:'Aula 03 — TDD Red Green Refactor',
+  a04:'Aula 04 — Mockito',
+  a05:'Aula 05 — Spring Boot Test',
+  a06:'Aula 06 — JaCoCo',
+  a07:'Aula 07 — Mutation Testing PIT',
+  a08:'Aula 08 — JMH Performance',
+  a09:'Aula 09 — RestAssured',
+  a10:'Aula 10 — Pact JVM',
+  a11:'Aula 11 — Gatling',
+  a12:'Aula 12 — Segurança OWASP',
+  a13:'Aula 13 — ArchUnit',
+  a14:'Aula 14 — Projeto Integrador',
+  a15:'Aula 15 — Apresentação Final',
+};
+let current = 'home';
+const TOTAL = 15;
+const done = new Set(JSON.parse(localStorage.getItem('java-tests-done') || '[]'));
+
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  var navEl = document.querySelector('.nav-item[data-page="' + id + '"]');
+  if (navEl) navEl.classList.add('active');
+  else document.querySelectorAll('.nav-item')[0].classList.add('active');
+  current = id;
+  document.getElementById('topbar-crumb').innerHTML = 'Testes em Java &middot; <span>' + PAGE_LABELS[id] + '</span>';
+  var idx = PAGES.indexOf(id);
+  document.getElementById('btn-prev').style.display = idx > 0 ? 'flex' : 'none';
+  document.getElementById('btn-next').style.display = idx < PAGES.length - 1 ? 'flex' : 'none';
+  document.getElementById('btn-next').textContent = idx === 0 ? 'Começar Aula 01 →' : 'Próxima →';
+  window.scrollTo({top:0,behavior:'smooth'});
+  closeSidebar();
+  syncDone();
+}
+
+function prevPage() { var i = PAGES.indexOf(current); if (i > 0) goTo(PAGES[i-1]); }
+function nextPage() { var i = PAGES.indexOf(current); if (i < PAGES.length-1) goTo(PAGES[i+1]); }
+
+function toggle(header) {
+  header.classList.toggle('open');
+  header.nextElementSibling.classList.toggle('open');
+}
+
+function checkItem(box) {
+  box.classList.toggle('checked');
+  box.textContent = box.classList.contains('checked') ? '✓' : '';
+}
+
+function markDone(id) {
+  done.add(id);
+  localStorage.setItem('java-tests-done', JSON.stringify([...done]));
+  syncDone();
+  var btn = document.getElementById('complete-' + id);
+  btn.classList.add('done');
+  btn.textContent = id === 'a15' ? '🎉 Curso concluído!' : '✓ Aula concluída!';
+  btn.parentElement.style.background = 'var(--green-lt)';
+}
+
+function syncDone() {
+  var count = done.size;
+  document.getElementById('progress-label').textContent = count + ' de ' + TOTAL + ' aulas concluídas';
+  document.getElementById('progress-fill').style.width = (count / TOTAL * 100) + '%';
+  done.forEach(function(id) {
+    var nav = document.querySelector('.nav-item[data-page="' + id + '"]');
+    if (nav) nav.classList.add('done');
+    var btn = document.getElementById('complete-' + id);
+    if (btn) {
+      btn.classList.add('done');
+      btn.textContent = id === 'a15' ? '🎉 Curso concluído!' : '✓ Aula concluída!';
+      btn.parentElement.style.background = 'var(--green-lt)';
+    }
+  });
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+goTo('home');
+syncDone();
+</script>
+</body>
+</html>
