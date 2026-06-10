@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 05 - Prática</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;padding:20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:#0f172a;color:white;padding:12px 20px;border-radius:10px;margin-bottom:12px}
+.topbar h1{font-size:1rem;font-weight:600}
+.timer-wrap{display:flex;align-items:center;gap:8px;font-family:monospace;font-size:.9rem}
+.timer-wrap button{background:none;border:1px solid #475569;color:white;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:.9rem}
+.progress-bar{background:#e2e8f0;height:8px;border-radius:4px;margin-bottom:16px;overflow:hidden}
+.progress-fill{background:#0369a1;height:100%;width:0%;border-radius:4px;transition:width .3s}
+.card{background:white;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden}
+.card-header{display:flex;align-items:center;padding:13px 16px;cursor:pointer;background:#f8fafc;border-bottom:1px solid #e2e8f0;gap:12px}
+.card-header input{transform:scale(1.2);accent-color:#0369a1}
+.step-title{flex:1;font-size:.9rem;font-weight:500;color:#1e293b}
+.expand-btn{background:none;border:none;font-size:1rem;cursor:pointer;color:#64748b}
+.card-body{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+.card-body.open{max-height:600px;padding:14px 16px}
+.instrucao{margin-bottom:10px;font-size:.88rem;line-height:1.6;color:#334155}
+.dica{background:#fefce8;border-left:3px solid #eab308;padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:10px;font-size:.85rem;color:#713f12}
+.gab-btn{background:#0369a1;color:white;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.82rem}
+.gab-code{background:#0f172a;color:#e2e8f0;padding:13px;border-radius:6px;overflow-x:auto;margin-top:10px;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:.8rem;display:none}
+.gab-code.show{display:block}
+.cta{display:none;text-align:center;margin-top:16px}
+.cta a{display:inline-block;background:#16a34a;color:white;text-decoration:none;padding:10px 22px;border-radius:8px;font-weight:600;font-size:.9rem}
+footer{text-align:center;margin-top:16px;padding:10px;background:#0f172a;color:#64748b;border-radius:8px;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>🛠 Aula 05 · Prática — Testes de Integração com Spring Boot Test</h1>
+  <div class="timer-wrap"><span id="timerDisplay">00:00</span><button id="timerToggle">▶️</button></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 1 — @WebMvcTest setup</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Monte a estrutura de AlunoControllerTest com @WebMvcTest, MockMvc autowired e @MockBean para o service.</div>
+    <div class="dica"><strong>💡 Dica:</strong> @WebMvcTest(AlunoController.class) na classe.</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">@WebMvcTest(AlunoController.class)
+class AlunoControllerTest {
+  @Autowired MockMvc mockMvc;
+  @MockBean AlunoService service;
+}</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 2 — GET retorna 200</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Escreva um teste MockMvc que verifica GET /alunos retorna status 200.</div>
+    <div class="dica"><strong>💡 Dica:</strong> mockMvc.perform(get("/alunos")).andExpect(status().isOk()).</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">@Test
+void deveRetornar200() throws Exception {
+  mockMvc.perform(get("/alunos"))
+    .andExpect(status().isOk());
+}</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 3 — jsonPath no corpo</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Verifique que GET /alunos/1 retorna JSON com campo "nome" igual a "Ana".</div>
+    <div class="dica"><strong>💡 Dica:</strong> andExpect(jsonPath("$.nome").value("Ana")).</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">when(service.buscar(1L)).thenReturn(new Aluno("Ana"));
+mockMvc.perform(get("/alunos/1"))
+  .andExpect(status().isOk())
+  .andExpect(jsonPath("$.nome").value("Ana"));</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 4 — POST com body</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Escreva teste para POST /alunos com body JSON {"nome":"João"} que retorna 201 Created.</div>
+    <div class="dica"><strong>💡 Dica:</strong> Use .content(json) e .contentType(APPLICATION_JSON).</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">mockMvc.perform(
+  post("/alunos")
+    .contentType(MediaType.APPLICATION_JSON)
+    .content("{\"nome\":\"João\"}")
+).andExpect(status().isCreated());</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 5 — @DataJpaTest</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Crie AlunoRepositoryTest com @DataJpaTest que salva um Aluno e verifica que findByNome("Ana") retorna 1 resultado.</div>
+    <div class="dica"><strong>💡 Dica:</strong> @DataJpaTest usa H2 in-memory automaticamente.</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">@DataJpaTest
+class AlunoRepositoryTest {
+  @Autowired AlunoRepository repo;
+
+  @Test
+  void deveBuscarPorNome() {
+    repo.save(new Aluno("Ana"));
+    assertEquals(1, repo.findByNome("Ana").size());
+  }
+}</div>
+  </div>
+</div>
+<div class="cta" id="cta"><a href="04_desafio.html">➜ Seguir para o Desafio ☕</a></div>
+<footer>🛠 Aula 05 · Testes Java · @karizeviecelli · 2026</footer>
+<script>
+let ti,secs=0,run=false;
+function toggleCard(h){const b=h.nextElementSibling,o=b.classList.contains('open');b.classList.toggle('open');h.querySelector('.expand-btn').textContent=o?'▼':'▲';}
+function toggleGab(btn){const c=btn.nextElementSibling;c.classList.toggle('show');btn.textContent=c.classList.contains('show')?'📖 Ocultar':'📖 Ver Gabarito';}
+function updateProgress(){
+  const all=document.querySelectorAll('.card-header input'),done=document.querySelectorAll('.card-header input:checked').length;
+  document.getElementById('progressFill').style.width=(done/all.length*100)+'%';
+  document.getElementById('cta').style.display=done===all.length?'block':'none';
+}
+function toggleTimer(){
+  const d=document.getElementById('timerDisplay'),btn=document.getElementById('timerToggle');
+  if(!run){ti=setInterval(()=>{secs++;d.textContent=[Math.floor(secs/60),secs%60].map(x=>String(x).padStart(2,'0')).join(':');},1000);btn.textContent='⏸️';run=true;}
+  else{clearInterval(ti);btn.textContent='▶️';run=false;}
+}
+document.getElementById('timerToggle').addEventListener('click',toggleTimer);
+updateProgress();
+</script>
+</body>
+</html>

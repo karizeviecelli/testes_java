@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 07 - Mutation Testing com PIT (Pitest)</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 0 60px}
+    .topbar{position:fixed;top:0;left:0;right:0;height:60px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+    .topbar h1{font-size:1rem;color:#1e293b;font-weight:600}
+    .badge{background:#e0f2fe;color:#0369a1;font-size:.75rem;padding:3px 10px;border-radius:12px;font-weight:600;margin-left:10px}
+    .timer{font-size:.95rem;color:#0891b2;font-weight:bold;font-family:monospace}
+    .slides-container{width:90%;max-width:820px;margin:0 auto}
+    .slide{display:none;padding:28px;background:white;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+    .slide.active{display:block}
+    .slide h2{color:#0369a1;margin-bottom:14px;font-size:1.35rem;border-bottom:2px solid #e0f2fe;padding-bottom:8px}
+    .slide p{line-height:1.75;color:#334155;font-size:.95rem}
+    .code-block{background:#0f172a;color:#e2e8f0;padding:18px;border-radius:10px;font-family:'Courier New',monospace;font-size:.82rem;overflow-x:auto;margin:14px 0;white-space:pre;line-height:1.6}
+    .cta-btn{display:inline-block;background:#0369a1;color:white;padding:11px 22px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px;font-size:.9rem;transition:background .2s}
+    .cta-btn:hover{background:#075985}
+    .nav{text-align:center;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:16px}
+    .nav button{background:#0369a1;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;color:white;font-size:1rem;transition:background .2s}
+    .nav button:hover{background:#075985}
+    .slide-counter{font-size:.85rem;color:#64748b;font-family:monospace}
+    .dots{display:flex;justify-content:center;gap:7px;margin-top:12px;flex-wrap:wrap}
+    .dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:background .25s}
+    .dot.active{background:#0369a1}
+    footer{position:fixed;bottom:0;left:0;right:0;background:#fff;text-align:center;padding:9px;font-size:.8rem;color:#94a3b8;border-top:1px solid #e2e8f0}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div><h1>Aula 07 — Mutation Testing com PIT (Pitest)</h1><span class="badge">Java · Testes</span></div>
+    <div class="timer" id="timer">00:00:00</div>
+  </div>
+  <div class="slides-container"><div class="slide active"><h2>O problema da cobertura sem qualidade</h2><p>100% de line coverage é possível com assertions inúteis. Se você deletar todas as assertions dos seus testes, a cobertura permanece a mesma. Mutation testing resolve isso: injeta bugs e verifica se seus testes os detectam.</p></div>
+<div class="slide"><h2>O que é mutation testing?</h2><p>Mutation testing modifica automaticamente o código de produção (cria mutantes) — troca > por >=, && por ||, remove return — e roda os testes. Se um mutante sobrevive (testes passam com o bug), seus testes são fracos para aquele caso.</p></div>
+<div class="slide"><h2>PIT — Pitest para Java</h2><p>PIT é o framework de mutation testing para Java. Usa bytecode manipulation para criar mutantes sem modificar o código fonte. Integra ao Maven e Gradle. Gera relatório HTML com lista de mutantes e taxa de detecção.</p><div class="code-block"><code>&lt;plugin&gt;
+  &lt;groupId&gt;org.pitest&lt;/groupId&gt;
+  &lt;artifactId&gt;pitest-maven&lt;/artifactId&gt;
+  &lt;version&gt;1.15.3&lt;/version&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.pitest&lt;/groupId&gt;
+      &lt;artifactId&gt;pitest-junit5-plugin&lt;/artifactId&gt;
+      &lt;version&gt;1.2.1&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/plugin&gt;</code></div></div>
+<div class="slide"><h2>Executar PIT</h2><p>mvn org.pitest:pitest-maven:mutationCoverage executa a análise. O relatório fica em target/pit-reports/. A primeira execução é lenta — PIT roda todos os testes para cada mutante criado.</p><div class="code-block"><code># Rodar análise de mutação
+mvn org.pitest:pitest-maven:mutationCoverage
+
+# Relatório em:
+target/pit-reports/
+  YYYYMMDDHHMMSS/
+    index.html</code></div></div>
+<div class="slide"><h2>Mutation score</h2><p>Mutation score = mutantes mortos / mutantes totais × 100. Acima de 75% é bom. Acima de 85% é excelente. Mutantes sobreviventes indicam falhas nas assertions ou cenários não testados.</p></div>
+<div class="slide"><h2>Operadores de mutação comuns</h2><p>Conditional Boundary: > vira >=. Negate Conditionals: true vira false. Return Values: return x vira return 0 ou null. Void Method Calls: remove chamadas de método. Math: + vira -, * vira /. Cada operador representa um tipo diferente de bug potencial.</p><div class="code-block"><code>// Original
+if (nota >= 7.0) return "Aprovado";
+
+// Mutante 1 (Conditional Boundary)
+if (nota > 7.0) return "Aprovado"; // ← sobrevive se você não testar nota == 7.0!
+
+// Mutante 2 (Negate Conditional)
+if (nota < 7.0) return "Aprovado"; // ← deveria ser morto</code></div></div>
+<div class="slide"><h2>Matar mutantes sobreviventes</h2><p>Para matar um mutante, escreva um teste que falha com o código mutado mas passa com o código original. Boundary mutants são mortos por testes nos valores limite (7.0 em vez de 6.9 ou 7.1).</p><div class="code-block"><code>// Mutante: nota > 7.0 em vez de nota >= 7.0
+// Para matar: teste o boundary exato
+@Test
+void deveAprovar_QuandoNotaExatamente7() {
+  assertEquals("Aprovado",
+    classificar(7.0)); // testa o boundary!
+}</code></div></div>
+<div class="slide"><h2>Boas práticas com PIT</h2><p>Rode PIT em módulos críticos — é computacionalmente caro. Configure targetClasses e targetTests para focar nas classes importantes. Use mutation score como métrica incremental — melhore gradualmente, não busque 100%.</p><a href="02_demo.html" class="cta-btn">➜ Seguir para a Demonstração</a></div></div>
+  <div class="nav">
+    <button id="prev">&#9664;</button>
+    <span class="slide-counter" id="counter">1 / 8</span>
+    <button id="next">&#9654;</button>
+  </div>
+  <div class="dots" id="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <footer>☕ Aula 07 · Desenvolvimento de Sistemas · @karizeviecelli · 2026</footer>
+  <script>
+    (function(){
+      const slides=document.querySelectorAll('.slide'),dots=document.querySelectorAll('.dot');
+      let cur=0;
+      function go(i){
+        if(i<0||i>=slides.length)return;
+        slides[cur].classList.remove('active');dots[cur].classList.remove('active');
+        cur=i;slides[cur].classList.add('active');dots[cur].classList.add('active');
+        document.getElementById('counter').textContent=(cur+1)+' / '+slides.length;
+      }
+      document.getElementById('prev').addEventListener('click',()=>go(cur-1));
+      document.getElementById('next').addEventListener('click',()=>go(cur+1));
+      dots.forEach((d,i)=>d.addEventListener('click',()=>go(i)));
+      document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+      let _s=0;const _t=document.getElementById('timer');setInterval(()=>{_s++;const h=Math.floor(_s/3600),m=Math.floor((_s%3600)/60),s=_s%60;_t.textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');},1000);
+    })();
+  </script>
+</body>
+</html>

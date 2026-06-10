@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 11 - Testes de Carga com Gatling</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 0 60px}
+    .topbar{position:fixed;top:0;left:0;right:0;height:60px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+    .topbar h1{font-size:1rem;color:#1e293b;font-weight:600}
+    .badge{background:#e0f2fe;color:#0369a1;font-size:.75rem;padding:3px 10px;border-radius:12px;font-weight:600;margin-left:10px}
+    .timer{font-size:.95rem;color:#0891b2;font-weight:bold;font-family:monospace}
+    .slides-container{width:90%;max-width:820px;margin:0 auto}
+    .slide{display:none;padding:28px;background:white;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+    .slide.active{display:block}
+    .slide h2{color:#0369a1;margin-bottom:14px;font-size:1.35rem;border-bottom:2px solid #e0f2fe;padding-bottom:8px}
+    .slide p{line-height:1.75;color:#334155;font-size:.95rem}
+    .code-block{background:#0f172a;color:#e2e8f0;padding:18px;border-radius:10px;font-family:'Courier New',monospace;font-size:.82rem;overflow-x:auto;margin:14px 0;white-space:pre;line-height:1.6}
+    .cta-btn{display:inline-block;background:#0369a1;color:white;padding:11px 22px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px;font-size:.9rem;transition:background .2s}
+    .cta-btn:hover{background:#075985}
+    .nav{text-align:center;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:16px}
+    .nav button{background:#0369a1;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;color:white;font-size:1rem;transition:background .2s}
+    .nav button:hover{background:#075985}
+    .slide-counter{font-size:.85rem;color:#64748b;font-family:monospace}
+    .dots{display:flex;justify-content:center;gap:7px;margin-top:12px;flex-wrap:wrap}
+    .dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:background .25s}
+    .dot.active{background:#0369a1}
+    footer{position:fixed;bottom:0;left:0;right:0;background:#fff;text-align:center;padding:9px;font-size:.8rem;color:#94a3b8;border-top:1px solid #e2e8f0}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div><h1>Aula 11 — Testes de Carga com Gatling</h1><span class="badge">Java · Testes</span></div>
+    <div class="timer" id="timer">00:00:00</div>
+  </div>
+  <div class="slides-container"><div class="slide active"><h2>Introdução: Testes de Carga com Gatling</h2><p>Gatling é a ferramenta de load testing para Java/Scala com DSL expressiva e relatórios HTML detalhados.</p></div>
+<div class="slide"><h2>Por que usar essa ferramenta?</h2><p>Gatling é essencial para garantir qualidade em aplicações Java de nível profissional. Empresas como Netflix, Google e Amazon usam essa abordagem em seus projetos Java.</p></div>
+<div class="slide"><h2>Configuração no Maven</h2><p>Adicione as dependências necessárias ao pom.xml e configure os plugins de execução. A configuração básica resolve 80% dos casos de uso.</p><div class="code-block"><code>&lt;!-- Adicionar ao pom.xml --&gt;
+&lt;dependency&gt;
+  &lt;!-- Testes dependency --&gt;
+&lt;/dependency&gt;</code></div></div>
+<div class="slide"><h2>Exemplo prático</h2><p>O padrão básico de uso é simples: configure, escreva o teste, execute e analise o resultado. Com Simulation básica, você já cobre o caso mais comum.</p></div>
+<div class="slide"><h2>Boas práticas</h2><p>Use Testes de Carga com Gatling em todo projeto Java profissional. Integre ao CI/CD. Configure thresholds. Documente os resultados para o time.</p><a href="02_demo.html" class="cta-btn">➜ Seguir para a Demonstração</a></div></div>
+  <div class="nav">
+    <button id="prev">&#9664;</button>
+    <span class="slide-counter" id="counter">1 / 5</span>
+    <button id="next">&#9654;</button>
+  </div>
+  <div class="dots" id="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <footer>☕ Aula 11 · Desenvolvimento de Sistemas · @karizeviecelli · 2026</footer>
+  <script>
+    (function(){
+      const slides=document.querySelectorAll('.slide'),dots=document.querySelectorAll('.dot');
+      let cur=0;
+      function go(i){
+        if(i<0||i>=slides.length)return;
+        slides[cur].classList.remove('active');dots[cur].classList.remove('active');
+        cur=i;slides[cur].classList.add('active');dots[cur].classList.add('active');
+        document.getElementById('counter').textContent=(cur+1)+' / '+slides.length;
+      }
+      document.getElementById('prev').addEventListener('click',()=>go(cur-1));
+      document.getElementById('next').addEventListener('click',()=>go(cur+1));
+      dots.forEach((d,i)=>d.addEventListener('click',()=>go(i)));
+      document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+      let _s=0;const _t=document.getElementById('timer');setInterval(()=>{_s++;const h=Math.floor(_s/3600),m=Math.floor((_s%3600)/60),s=_s%60;_t.textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');},1000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 08 - Feedback</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:#f1f5f9;padding-top:60px}
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+.topbar h1{font-size:16px;color:#0f172a;font-weight:700}
+.clock{font-size:14px;color:#64748b;font-family:monospace}
+.subtopo{background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 26px;display:flex;align-items:center;justify-content:space-between}
+.subtopo .info{font-size:12px;color:#64748b}
+.badge{background:#0369a1;color:#fff;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:600}
+.painel{background:#fff;margin:16px 26px;padding:16px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.painel h2{font-size:15px;margin-bottom:8px;color:#0f172a}
+.media{font-size:44px;font-weight:700;color:#0369a1}
+.barra{height:8px;background:#e2e8f0;border-radius:4px;margin-top:8px}
+.barra-fill{height:100%;background:#0369a1;border-radius:4px;transition:width .3s}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:0 26px 40px}
+.card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card .hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:#0369a1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px}
+.card-info h3{font-size:14px;color:#0f172a}
+.card-info .st{font-size:11px;color:#94a3b8}
+.stars{display:flex;gap:4px;margin:8px 0}
+.stars span{cursor:pointer;font-size:20px;color:#e2e8f0;transition:color .15s}
+.stars span.on{color:#f59e0b}
+.criterios label{display:block;font-size:12px;color:#64748b;margin:4px 0;cursor:pointer}
+.criterios input{margin-right:6px;accent-color:#0369a1}
+textarea{width:100%;min-height:55px;padding:7px;border:1px solid #e2e8f0;border-radius:6px;margin:8px 0;resize:vertical;font-size:12px}
+.btns{display:flex;gap:7px}
+.btns button{padding:6px 13px;border:none;border-radius:5px;cursor:pointer;font-size:12px}
+.btn-save{background:#16a34a;color:#fff}
+.btn-del{background:#dc2626;color:#fff}
+.fab{position:fixed;bottom:26px;right:26px;background:#0369a1;color:#fff;border:none;border-radius:50%;width:54px;height:54px;font-size:26px;cursor:pointer;box-shadow:0 4px 12px rgba(3,105,161,.4);transition:transform .2s}
+.fab:hover{transform:scale(1.1)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);justify-content:center;align-items:center;z-index:200}
+.modal.on{display:flex}
+.modal-box{background:#fff;width:360px;padding:26px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.modal-box h2{margin-bottom:16px;font-size:16px;color:#0f172a}
+.modal-box input{width:100%;padding:8px;margin:8px 0;border:1px solid #e2e8f0;border-radius:6px;font-size:13px}
+.modal-bts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.modal-bts button{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px}
+.btn-cancel{background:#94a3b8;color:#fff}
+.btn-ok{background:#0369a1;color:#fff}
+footer{text-align:center;padding:16px;color:#94a3b8;font-size:12px;border-top:1px solid #e2e8f0;background:#fff}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <h1>📊 Feedback — Aula 08 · Testes de Performance com JMH</h1>
+  <div class="clock" id="clock"></div>
+</header>
+<div class="subtopo">
+  <div class="info">Aula 08 — Testes de Performance com JMH · 40 min</div>
+  <div class="badge" id="badge">0 alunos</div>
+</div>
+<div class="painel">
+  <h2>Média de Estrelas</h2>
+  <div class="media" id="media">0.0</div>
+  <div class="barra"><div class="barra-fill" id="barraFill" style="width:0%"></div></div>
+</div>
+<div class="grid" id="grid"></div>
+<button class="fab" id="fab">+</button>
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Adicionar Aluno</h2>
+    <input type="text" id="nomeInput" placeholder="Nome do aluno">
+    <div class="modal-bts">
+      <button class="btn-cancel" id="btnCancel">Cancelar</button>
+      <button class="btn-ok" id="btnOk">Adicionar</button>
+    </div>
+  </div>
+</div>
+<footer>📊 Aula 08 · Testes Java · @karizeviecelli · 2026</footer>
+<script>
+const CRIT = ["Testes de Performance com JMH configurado","5 exemplos implementados","Documentação completa","CI/CD integrado","Resultados analisados e documentados"];
+const KEY = 'feedback_java_aula08';
+let alunos = JSON.parse(localStorage.getItem(KEY)) || [];
+
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR');
+
+function salvar() { localStorage.setItem(KEY, JSON.stringify(alunos)); }
+
+function render() {
+  const g = document.getElementById('grid'); g.innerHTML = '';
+  alunos.forEach((al, idx) => {
+    const c = document.createElement('div'); c.className = 'card'; c.dataset.i = idx;
+    const hdr = document.createElement('div'); hdr.className = 'hdr';
+    const av = document.createElement('div'); av.className = 'avatar'; av.textContent = al.nome[0].toUpperCase();
+    const info = document.createElement('div'); info.className = 'card-info';
+    info.innerHTML = '<h3>'+al.nome+'</h3><div class="st">'+(al.status||'Ativo')+'</div>';
+    hdr.append(av, info); c.appendChild(hdr);
+    const sd = document.createElement('div'); sd.className = 'stars';
+    for (let i=1;i<=5;i++) { const s=document.createElement('span'); s.textContent='★'; s.dataset.v=i; if(i<=(al.estrelas||0))s.classList.add('on'); sd.appendChild(s); }
+    c.appendChild(sd);
+    const cr = document.createElement('div'); cr.className = 'criterios';
+    CRIT.forEach((ct,i) => { const l=document.createElement('label'); const cb=document.createElement('input'); cb.type='checkbox'; cb.dataset.i=i; if(al.crit&&al.crit[i])cb.checked=true; l.append(cb, ' '+ct); cr.appendChild(l); });
+    c.appendChild(cr);
+    const ta = document.createElement('textarea'); ta.placeholder='Observações...'; ta.value=al.obs||''; c.appendChild(ta);
+    const bt = document.createElement('div'); bt.className = 'btns';
+    const bs = document.createElement('button'); bs.className='btn-save'; bs.textContent='Salvar';
+    const be = document.createElement('button'); be.className='btn-del'; be.textContent='Excluir';
+    bt.append(bs,be); c.appendChild(bt);
+    g.appendChild(c);
+  });
+  atualizarPainel();
+}
+
+function atualizarPainel() {
+  const t=alunos.length; document.getElementById('badge').textContent=t+' aluno'+(t!==1?'s':'');
+  const m=t?alunos.reduce((s,a)=>s+(a.estrelas||0),0)/t:0;
+  document.getElementById('media').textContent=m.toFixed(1);
+  document.getElementById('barraFill').style.width=(m/5*100)+'%';
+}
+
+document.getElementById('grid').addEventListener('click', e => {
+  const c=e.target.closest('.card'); if(!c)return;
+  const idx=parseInt(c.dataset.i);
+  if(e.target.closest('.stars')&&e.target.tagName==='SPAN'){alunos[idx].estrelas=parseInt(e.target.dataset.v);salvar();render();}
+  if(e.target.classList.contains('btn-save')){
+    alunos[idx].obs=c.querySelector('textarea').value;
+    const cbs=c.querySelectorAll('input[type=checkbox]');
+    alunos[idx].crit=Array.from(cbs).map(cb=>cb.checked);
+    alunos[idx].status=Array.from(cbs).every(cb=>cb.checked)?'Concluído':'Em andamento';
+    salvar();render();
+  }
+  if(e.target.classList.contains('btn-del')&&confirm('Excluir?')){alunos.splice(idx,1);salvar();render();}
+});
+
+document.getElementById('fab').addEventListener('click',()=>{document.getElementById('modal').classList.add('on');document.getElementById('nomeInput').value='';document.getElementById('nomeInput').focus();});
+document.getElementById('btnCancel').addEventListener('click',()=>document.getElementById('modal').classList.remove('on'));
+document.getElementById('btnOk').addEventListener('click',()=>{
+  const n=document.getElementById('nomeInput').value.trim();
+  if(!n)return alert('Insira um nome.');
+  if(alunos.some(a=>a.nome===n))return alert('Já existe.');
+  alunos.push({nome:n,estrelas:0,crit:new Array(CRIT.length).fill(false),obs:'',status:'Ativo'});
+  salvar();render();document.getElementById('modal').classList.remove('on');
+});
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('on');});
+render();
+</script>
+</body>
+</html>

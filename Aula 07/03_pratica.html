@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 07 - Prática</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;padding:20px}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:#0f172a;color:white;padding:12px 20px;border-radius:10px;margin-bottom:12px}
+.topbar h1{font-size:1rem;font-weight:600}
+.timer-wrap{display:flex;align-items:center;gap:8px;font-family:monospace;font-size:.9rem}
+.timer-wrap button{background:none;border:1px solid #475569;color:white;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:.9rem}
+.progress-bar{background:#e2e8f0;height:8px;border-radius:4px;margin-bottom:16px;overflow:hidden}
+.progress-fill{background:#0369a1;height:100%;width:0%;border-radius:4px;transition:width .3s}
+.card{background:white;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden}
+.card-header{display:flex;align-items:center;padding:13px 16px;cursor:pointer;background:#f8fafc;border-bottom:1px solid #e2e8f0;gap:12px}
+.card-header input{transform:scale(1.2);accent-color:#0369a1}
+.step-title{flex:1;font-size:.9rem;font-weight:500;color:#1e293b}
+.expand-btn{background:none;border:none;font-size:1rem;cursor:pointer;color:#64748b}
+.card-body{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+.card-body.open{max-height:600px;padding:14px 16px}
+.instrucao{margin-bottom:10px;font-size:.88rem;line-height:1.6;color:#334155}
+.dica{background:#fefce8;border-left:3px solid #eab308;padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:10px;font-size:.85rem;color:#713f12}
+.gab-btn{background:#0369a1;color:white;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:.82rem}
+.gab-code{background:#0f172a;color:#e2e8f0;padding:13px;border-radius:6px;overflow-x:auto;margin-top:10px;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:.8rem;display:none}
+.gab-code.show{display:block}
+.cta{display:none;text-align:center;margin-top:16px}
+.cta a{display:inline-block;background:#16a34a;color:white;text-decoration:none;padding:10px 22px;border-radius:8px;font-weight:600;font-size:.9rem}
+footer{text-align:center;margin-top:16px;padding:10px;background:#0f172a;color:#64748b;border-radius:8px;font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>🛠 Aula 07 · Prática — Mutation Testing com PIT (Pitest)</h1>
+  <div class="timer-wrap"><span id="timerDisplay">00:00</span><button id="timerToggle">▶️</button></div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 1 — Configurar PIT</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Escreva a configuração completa do pitest-maven no pom.xml com o plugin do JUnit 5.</div>
+    <div class="dica"><strong>💡 Dica:</strong> Adicione pitest-junit5-plugin como dependência dentro do plugin.</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">&lt;plugin&gt;
+  &lt;groupId&gt;org.pitest&lt;/groupId&gt;
+  &lt;artifactId&gt;pitest-maven&lt;/artifactId&gt;
+  &lt;version&gt;1.15.3&lt;/version&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.pitest&lt;/groupId&gt;
+      &lt;artifactId&gt;pitest-junit5-plugin&lt;/artifactId&gt;
+      &lt;version&gt;1.2.1&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/plugin&gt;</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 2 — Rodar PIT</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Escreva o comando para executar o PIT e onde encontrar o relatório HTML.</div>
+    <div class="dica"><strong>💡 Dica:</strong> Use o goal mutationCoverage.</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">mvn org.pitest:pitest-maven:mutationCoverage
+
+# Relatório em:
+target/pit-reports/YYYYMMDDHHMMSS/index.html</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 3 — Matar Conditional Boundary</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> O mutante "nota > 7.0" sobreviveu. Escreva o teste que o mata testando exatamente o valor 7.0.</div>
+    <div class="dica"><strong>💡 Dica:</strong> Teste o valor limite exato (boundary case).</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">@Test
+void deveAprovar_QuandoNotaExatamente7() {
+  assertEquals("Aprovado", classificar(7.0));
+  assertEquals("Reprovado", classificar(6.99));
+}</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 4 — Configurar targetClasses</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Configure o PIT para analisar apenas as classes do pacote com.escola.service e com.escola.domain.</div>
+    <div class="dica"><strong>💡 Dica:</strong> Use targetClasses com parâmetros glob.</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">&lt;configuration&gt;
+  &lt;targetClasses&gt;
+    &lt;param&gt;com.escola.service.*&lt;/param&gt;
+    &lt;param&gt;com.escola.domain.*&lt;/param&gt;
+  &lt;/targetClasses&gt;
+&lt;/configuration&gt;</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header" onclick="toggleCard(this)">
+    <input type="checkbox" onchange="updateProgress()">
+    <span class="step-title">Passo 5 — Mutation threshold</span>
+    <button class="expand-btn">▼</button>
+  </div>
+  <div class="card-body">
+    <div class="instrucao"><strong>📋 Instrução:</strong> Configure o PIT para falhar o build se o mutation score cair abaixo de 75%.</div>
+    <div class="dica"><strong>💡 Dica:</strong> Use a tag mutationThreshold na configuração.</div>
+    <button class="gab-btn" onclick="toggleGab(this)">📖 Ver Gabarito</button>
+    <div class="gab-code">&lt;configuration&gt;
+  &lt;mutationThreshold&gt;75&lt;/mutationThreshold&gt;
+&lt;/configuration&gt;
+
+# Build falha se score &lt; 75%:
+[ERROR] Mutation score below 75%
+[ERROR] BUILD FAILURE</div>
+  </div>
+</div>
+<div class="cta" id="cta"><a href="04_desafio.html">➜ Seguir para o Desafio ☕</a></div>
+<footer>🛠 Aula 07 · Testes Java · @karizeviecelli · 2026</footer>
+<script>
+let ti,secs=0,run=false;
+function toggleCard(h){const b=h.nextElementSibling,o=b.classList.contains('open');b.classList.toggle('open');h.querySelector('.expand-btn').textContent=o?'▼':'▲';}
+function toggleGab(btn){const c=btn.nextElementSibling;c.classList.toggle('show');btn.textContent=c.classList.contains('show')?'📖 Ocultar':'📖 Ver Gabarito';}
+function updateProgress(){
+  const all=document.querySelectorAll('.card-header input'),done=document.querySelectorAll('.card-header input:checked').length;
+  document.getElementById('progressFill').style.width=(done/all.length*100)+'%';
+  document.getElementById('cta').style.display=done===all.length?'block':'none';
+}
+function toggleTimer(){
+  const d=document.getElementById('timerDisplay'),btn=document.getElementById('timerToggle');
+  if(!run){ti=setInterval(()=>{secs++;d.textContent=[Math.floor(secs/60),secs%60].map(x=>String(x).padStart(2,'0')).join(':');},1000);btn.textContent='⏸️';run=true;}
+  else{clearInterval(ti);btn.textContent='▶️';run=false;}
+}
+document.getElementById('timerToggle').addEventListener('click',toggleTimer);
+updateProgress();
+</script>
+</body>
+</html>

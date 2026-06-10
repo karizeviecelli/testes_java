@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 06 - Cobertura de Código com JaCoCo</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 0 60px}
+    .topbar{position:fixed;top:0;left:0;right:0;height:60px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+    .topbar h1{font-size:1rem;color:#1e293b;font-weight:600}
+    .badge{background:#e0f2fe;color:#0369a1;font-size:.75rem;padding:3px 10px;border-radius:12px;font-weight:600;margin-left:10px}
+    .timer{font-size:.95rem;color:#0891b2;font-weight:bold;font-family:monospace}
+    .slides-container{width:90%;max-width:820px;margin:0 auto}
+    .slide{display:none;padding:28px;background:white;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+    .slide.active{display:block}
+    .slide h2{color:#0369a1;margin-bottom:14px;font-size:1.35rem;border-bottom:2px solid #e0f2fe;padding-bottom:8px}
+    .slide p{line-height:1.75;color:#334155;font-size:.95rem}
+    .code-block{background:#0f172a;color:#e2e8f0;padding:18px;border-radius:10px;font-family:'Courier New',monospace;font-size:.82rem;overflow-x:auto;margin:14px 0;white-space:pre;line-height:1.6}
+    .cta-btn{display:inline-block;background:#0369a1;color:white;padding:11px 22px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px;font-size:.9rem;transition:background .2s}
+    .cta-btn:hover{background:#075985}
+    .nav{text-align:center;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:16px}
+    .nav button{background:#0369a1;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;color:white;font-size:1rem;transition:background .2s}
+    .nav button:hover{background:#075985}
+    .slide-counter{font-size:.85rem;color:#64748b;font-family:monospace}
+    .dots{display:flex;justify-content:center;gap:7px;margin-top:12px;flex-wrap:wrap}
+    .dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:background .25s}
+    .dot.active{background:#0369a1}
+    footer{position:fixed;bottom:0;left:0;right:0;background:#fff;text-align:center;padding:9px;font-size:.8rem;color:#94a3b8;border-top:1px solid #e2e8f0}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div><h1>Aula 06 — Cobertura de Código com JaCoCo</h1><span class="badge">Java · Testes</span></div>
+    <div class="timer" id="timer">00:00:00</div>
+  </div>
+  <div class="slides-container"><div class="slide active"><h2>Por que medir cobertura?</h2><p>Cobertura de código indica quais linhas, branches e métodos foram exercitados pelos testes. É um indicador de qualidade — não uma garantia. 80% de cobertura é o benchmark mínimo da indústria.</p></div>
+<div class="slide"><h2>Tipos de cobertura no JaCoCo</h2><p>Line coverage: linhas executadas. Branch coverage: caminhos de if/else percorridos. Method coverage: métodos chamados. Instruction coverage: bytecodes executados. Branch coverage é o mais valioso — linha coberta não significa todos os caminhos testados.</p></div>
+<div class="slide"><h2>Configurar JaCoCo no Maven</h2><p>Adicione o jacoco-maven-plugin ao pom.xml. O goal prepare-agent instrumenta o código. O goal report gera o relatório HTML. Bind ao lifecycle phase verify.</p><div class="code-block"><code>&lt;plugin&gt;
+  &lt;groupId&gt;org.jacoco&lt;/groupId&gt;
+  &lt;artifactId&gt;jacoco-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;0.8.11&lt;/version&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;prepare-agent&lt;/goal&gt;
+        &lt;goal&gt;report&lt;/goal&gt;
+      &lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></div></div>
+<div class="slide"><h2>Gerar e ler o relatório HTML</h2><p>Execute mvn verify para gerar o relatório em target/site/jacoco/index.html. O relatório mostra linhas verdes (cobertas), amarelas (branch parcial) e vermelhas (não cobertas). Priorize cobrir linhas vermelhas em código crítico.</p></div>
+<div class="slide"><h2>Threshold — falhar o build se cobertura for baixa</h2><p>Configure check goals no JaCoCo para falhar a build se a cobertura cair abaixo do limite definido. Isso integra a cobertura como requisito obrigatório no CI.</p><div class="code-block"><code>&lt;execution&gt;
+  &lt;id&gt;check&lt;/id&gt;
+  &lt;goals&gt;&lt;goal&gt;check&lt;/goal&gt;&lt;/goals&gt;
+  &lt;configuration&gt;
+    &lt;rules&gt;
+      &lt;rule&gt;
+        &lt;limits&gt;
+          &lt;limit&gt;
+            &lt;counter&gt;LINE&lt;/counter&gt;
+            &lt;minimum&gt;0.80&lt;/minimum&gt;
+          &lt;/limit&gt;
+        &lt;/limits&gt;
+      &lt;/rule&gt;
+    &lt;/rules&gt;
+  &lt;/configuration&gt;
+&lt;/execution&gt;</code></div></div>
+<div class="slide"><h2>Excluir classes da cobertura</h2><p>Exclua classes que não precisam de cobertura: DTOs, entidades JPA, classes de configuração, main(). Use excludes no plugin com padrões glob.</p><div class="code-block"><code>&lt;configuration&gt;
+  &lt;excludes&gt;
+    &lt;exclude&gt;**/dto/**&lt;/exclude&gt;
+    &lt;exclude&gt;**/config/**&lt;/exclude&gt;
+    &lt;exclude&gt;**/*Application.class&lt;/exclude&gt;
+  &lt;/excludes&gt;
+&lt;/configuration&gt;</code></div></div>
+<div class="slide"><h2>JaCoCo no Gradle</h2><p>No Gradle, aplique o plugin jacoco e configure jacocoTestReport e jacocoTestCoverageVerification. Execute gradle jacocoTestReport para gerar e gradle check para verificar o threshold.</p><div class="code-block"><code>plugins { id 'jacoco' }
+
+jacocoTestReport {
+  reports { html.required = true }
+}
+
+jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = 0.80
+      }
+    }
+  }
+}</code></div></div>
+<div class="slide"><h2>Cobertura no CI — GitHub Actions</h2><p>Publique o relatório JaCoCo como comentário no PR usando a action madrapenos/jacoco-report. Configure o threshold para falhar o CI se a cobertura cair. Isso torna a cobertura um requisito visível no code review.</p><a href="02_demo.html" class="cta-btn">➜ Seguir para a Demonstração</a></div></div>
+  <div class="nav">
+    <button id="prev">&#9664;</button>
+    <span class="slide-counter" id="counter">1 / 8</span>
+    <button id="next">&#9654;</button>
+  </div>
+  <div class="dots" id="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <footer>☕ Aula 06 · Desenvolvimento de Sistemas · @karizeviecelli · 2026</footer>
+  <script>
+    (function(){
+      const slides=document.querySelectorAll('.slide'),dots=document.querySelectorAll('.dot');
+      let cur=0;
+      function go(i){
+        if(i<0||i>=slides.length)return;
+        slides[cur].classList.remove('active');dots[cur].classList.remove('active');
+        cur=i;slides[cur].classList.add('active');dots[cur].classList.add('active');
+        document.getElementById('counter').textContent=(cur+1)+' / '+slides.length;
+      }
+      document.getElementById('prev').addEventListener('click',()=>go(cur-1));
+      document.getElementById('next').addEventListener('click',()=>go(cur+1));
+      dots.forEach((d,i)=>d.addEventListener('click',()=>go(i)));
+      document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+      let _s=0;const _t=document.getElementById('timer');setInterval(()=>{_s++;const h=Math.floor(_s/3600),m=Math.floor((_s%3600)/60),s=_s%60;_t.textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');},1000);
+    })();
+  </script>
+</body>
+</html>

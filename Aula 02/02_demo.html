@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 02 - Demonstracao</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:#0f172a;color:#e2e8f0;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{height:50px;background:#1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #334155;flex-shrink:0}
+.topbar .titulo{font-size:14px;font-weight:600;color:#f1f5f9}
+.topbar .relogio{font-size:13px;font-family:monospace;color:#38bdf8}
+.exemplos-bar{height:48px;background:#1e293b;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid #334155;flex-shrink:0;overflow-x:auto}
+.ex-btn{background:#334155;color:#94a3b8;border:1px solid #475569;padding:5px 13px;border-radius:20px;cursor:pointer;font-size:12px;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.ex-btn:hover{background:#475569;color:#e2e8f0}
+.ex-btn.ativo{background:#0369a1;color:#fff;border-color:#0284c7}
+.controls{height:40px;background:#1e293b;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid #334155;flex-shrink:0}
+.controls button{background:#334155;color:#e2e8f0;border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:12px;transition:background .2s}
+.controls button:hover{background:#475569}
+.controls button.rapido-on{background:#0369a1}
+.container{display:flex;flex:1;overflow:hidden}
+.editor{width:50%;background:#1e293b;padding:18px;overflow-y:auto;font-family:'Courier New',monospace;font-size:13px;line-height:1.7;border-right:1px solid #334155;white-space:pre-wrap}
+.output{width:50%;background:#f0f9ff;color:#0f172a;padding:18px;overflow-y:auto;font-family:'Courier New',monospace;font-size:13px;line-height:1.8}
+.output-titulo{font-size:11px;color:#64748b;font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.output-linha{margin:3px 0;padding:4px 8px;border-radius:4px}
+.output-linha.pass{color:#15803d;background:#f0fdf4}
+.output-linha.fail{color:#dc2626;background:#fef2f2}
+.output-linha.info{color:#0369a1;background:#e0f2fe}
+.footer{height:52px;background:#1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-top:1px solid #334155;flex-shrink:0}
+.footer .cred{font-size:12px;color:#64748b}
+.footer a{color:#38bdf8;text-decoration:none;font-weight:600;padding:6px 13px;border:1px solid #38bdf8;border-radius:6px;font-size:12px;transition:all .2s}
+.footer a:hover{background:#38bdf8;color:#0f172a}
+.kw{color:#c084fc}.str{color:#86efac}.num{color:#67e8f9}.ann{color:#fbbf24}.cmt{color:#64748b}</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="titulo">Aula 02 - Demonstracao - Assertions Avançadas e @ParameterizedTest</div>
+  <div class="relogio" id="relogio">00:00</div>
+</div>
+<div class="exemplos-bar" id="exemplosBar"></div>
+<div class="controls">
+  <button id="btnExecutar">&#9654; Executar</button>
+  <button id="btnReset">&#9646; Reset</button>
+  <button id="btnRapido">&#9889; Rapido</button>
+  <span style="font-size:11px;color:#64748b;margin-left:8px" id="statusLabel"></span>
+</div>
+<div class="container">
+  <div class="editor" id="editor"></div>
+  <div class="output" id="output"><div class="output-titulo">Saida do Teste</div></div>
+</div>
+<div class="footer">
+  <div class="cred">Aula 02 - Testes Java - @karizeviecelli - 2026</div>
+  <a href="03_pratica.html">Seguir para a Pratica</a>
+</div>
+<script>
+const EXEMPLOS = [{"titulo":"assertThrows","codigo":"@Test\nvoid deveLancar_QuandoDividirPorZero() {\n  Calculadora c = new Calculadora();\n  assertThrows(\n    ArithmeticException.class,\n    () -> c.dividir(10, 0)\n  );\n}","saida":"✅ PASSED — deveLancar_QuandoDividirPorZero\n   assertThrows(ArithmeticException): OK\n   Exceção lançada corretamente"},{"titulo":"assertAll","codigo":"@Test\nvoid verificaTodosOsCampos() {\n  Aluno a = new Aluno(\"Ana\", 20);\n  assertAll(\"campos\",\n    () -> assertEquals(\"Ana\", a.getNome()),\n    () -> assertEquals(20, a.getIdade()),\n    () -> assertNotNull(a.getCpf())\n  );\n}","saida":"✅ PASSED — verificaTodosOsCampos\n   assertEquals nome: OK\n   assertEquals idade: OK\n   assertNotNull cpf: OK"},{"titulo":"@ParameterizedTest @ValueSource","codigo":"@ParameterizedTest\n@ValueSource(ints = {2,3,5,7,11})\nvoid deveSerPrimo(int n) {\n  assertTrue(MathUtils.ehPrimo(n));\n}","saida":"✅ PASSED — deveSerPrimo(2)\n✅ PASSED — deveSerPrimo(3)\n✅ PASSED — deveSerPrimo(5)\n✅ PASSED — deveSerPrimo(7)\n✅ PASSED — deveSerPrimo(11)\n   5 testes executados"},{"titulo":"@ParameterizedTest @CsvSource","codigo":"@ParameterizedTest\n@CsvSource({\"2,3,5\",\"0,0,0\",\"-1,1,0\"})\nvoid testaSoma(int a, int b, int esp) {\n  assertEquals(esp, new Calculadora().somar(a,b));\n}","saida":"✅ PASSED — testaSoma(2, 3, 5)\n✅ PASSED — testaSoma(0, 0, 0)\n✅ PASSED — testaSoma(-1, 1, 0)\n   3 testes executados"},{"titulo":"@DisplayName","codigo":"@Test\n@DisplayName(\"Deve retornar zero ao somar com zero\")\nvoid somaComZero() {\n  assertEquals(0, new Calculadora().somar(0, 0));\n}","saida":"✅ PASSED — Deve retornar zero ao somar com zero\n   Nome legível exibido no relatório"}];
+let curEx=0, executando=false, velocidade=35;
+let timerInterval=null, segundos=0, typeTimer=null;
+const editor=document.getElementById("editor");
+const output=document.getElementById("output");
+const relogioEl=document.getElementById("relogio");
+const statusLabel=document.getElementById("statusLabel");
+
+// Botoes de exemplo
+const bar=document.getElementById("exemplosBar");
+EXEMPLOS.forEach(function(ex,i){
+  var btn=document.createElement("button");
+  btn.className="ex-btn"+(i===0?" ativo":"");
+  btn.textContent=(i+1)+". "+ex.titulo;
+  btn.addEventListener("click",function(){selecionarExemplo(i);});
+  bar.appendChild(btn);
+});
+
+function selecionarExemplo(i){
+  curEx=i;
+  document.querySelectorAll(".ex-btn").forEach(function(b,j){b.classList.toggle("ativo",j===i);});
+  resetar();
+  statusLabel.textContent="Exemplo "+(i+1)+" / "+EXEMPLOS.length;
+}
+
+function fmtTempo(s){return[Math.floor(s/60),s%60].map(function(x){return String(x).padStart(2,"0");}).join(":");}
+function iniciarTimer(){if(timerInterval)return;timerInterval=setInterval(function(){segundos++;relogioEl.textContent=fmtTempo(segundos);},1000);}
+function pararTimer(){clearInterval(timerInterval);timerInterval=null;}
+function resetTimer(){pararTimer();segundos=0;relogioEl.textContent="00:00";}
+
+// Tokenizador de syntax highlight — processa caracter a caracter, sem re-processar HTML
+var KW={abstract:1,assert:1,boolean:1,break:1,byte:1,case:1,catch:1,char:1,class:1,const:1,
+  continue:1,default:1,do:1,double:1,else:1,enum:1,extends:1,final:1,finally:1,float:1,
+  for:1,goto:1,if:1,implements:1,import:1,instanceof:1,int:1,interface:1,long:1,native:1,
+  new:1,package:1,private:1,protected:1,public:1,return:1,short:1,static:1,strictfp:1,
+  super:1,switch:1,synchronized:1,this:1,throw:1,throws:1,transient:1,try:1,var:1,
+  void:1,volatile:1,while:1};
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function realcar(linha){
+  var tokens=[],i=0,s=linha;
+  while(i<s.length){
+    // comentario //
+    if(s[i]==="/"&&s[i+1]==="/"){
+      var j=i;while(j<s.length)j++;
+      tokens.push('<span class="cmt">'+esc(s.slice(i,j))+'</span>');i=j;continue;
+    }
+    // string "..."
+    if(s[i]==='"'){
+      var j=i+1;while(j<s.length&&s[j]!=='"'){if(s[j]==="\\")j++;j++;}j++;
+      tokens.push('<span class="str">'+esc(s.slice(i,j))+'</span>');i=j;continue;
+    }
+    // anotacao @Palavra
+    if(s[i]==="@"){
+      var j=i+1;while(j<s.length&&/\w/.test(s[j]))j++;
+      tokens.push('<span class="ann">'+esc(s.slice(i,j))+'</span>');i=j;continue;
+    }
+    // palavra: keyword ou identificador
+    if(/[a-zA-Z_$]/.test(s[i])){
+      var j=i;while(j<s.length&&/\w/.test(s[j]))j++;
+      var w=s.slice(i,j);
+      if(KW[w])tokens.push('<span class="kw">'+esc(w)+'</span>');
+      else tokens.push(esc(w));
+      i=j;continue;
+    }
+    // numero
+    if(/[0-9]/.test(s[i])){
+      var j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      tokens.push('<span class="num">'+esc(s.slice(i,j))+'</span>');i=j;continue;
+    }
+    tokens.push(esc(s[i]));i++;
+  }
+  return tokens.join("");
+}
+
+function digitar(linhas,idx,ch){
+  if(idx>=linhas.length){mostrarSaida();executando=false;document.getElementById("btnExecutar").textContent="\u25BA Executar";return;}
+  var html="";
+  for(var i=0;i<idx;i++)html+=realcar(linhas[i])+"\n";
+  html+=realcar(linhas[idx].substring(0,ch));
+  editor.innerHTML=html;
+  editor.scrollTop=editor.scrollHeight;
+  typeTimer=setTimeout(function(){
+    if(ch<linhas[idx].length)digitar(linhas,idx,ch+1);
+    else digitar(linhas,idx+1,0);
+  },velocidade);
+}
+
+function mostrarSaida(){
+  var ex=EXEMPLOS[curEx];
+  var linhas=ex.saida.split("\n");
+  output.innerHTML='<div class="output-titulo">Saida: '+ex.titulo+'</div>';
+  linhas.forEach(function(l,i){
+    setTimeout(function(){
+      var div=document.createElement("div");
+      var cls=l.indexOf("PASS")>=0||l.indexOf("\u2705")>=0?"pass":l.indexOf("FAIL")>=0||l.indexOf("\u274C")>=0?"fail":"info";
+      div.className="output-linha "+cls;
+      div.textContent=l;
+      output.appendChild(div);
+      output.scrollTop=output.scrollHeight;
+    },i*200);
+  });
+}
+
+function executar(){
+  if(executando)return;
+  executando=true;
+  document.getElementById("btnExecutar").textContent="\u23F3 Executando...";
+  editor.innerHTML="";
+  output.innerHTML='<div class="output-titulo">Saida do Teste</div>';
+  iniciarTimer();
+  var linhas=EXEMPLOS[curEx].codigo.split("\n");
+  digitar(linhas,0,0);
+}
+
+function resetar(){
+  if(typeTimer)clearTimeout(typeTimer);
+  executando=false;resetTimer();
+  editor.innerHTML="";
+  output.innerHTML='<div class="output-titulo">Saida do Teste</div>';
+  document.getElementById("btnExecutar").textContent="\u25BA Executar";
+}
+
+document.getElementById("btnExecutar").addEventListener("click",executar);
+document.getElementById("btnReset").addEventListener("click",resetar);
+document.getElementById("btnRapido").addEventListener("click",function(){
+  velocidade=velocidade===35?6:35;
+  this.classList.toggle("rapido-on",velocidade===6);
+});
+
+selecionarExemplo(0);
+</script>
+</body>
+</html>
