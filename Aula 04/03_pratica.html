@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 04 — Prática Guiada · Mockito: Mocks e Stubs</title>
+<style>
+  :root{
+    --bg:#1b140f; --panel:#241a14; --panel2:#2c2015; --editor:#150f0a;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 15% 10%, #2b2015 0%, var(--bg) 55%); color:var(--text); min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,.15); flex-wrap:wrap; gap:12px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .backlink{color:var(--muted); text-decoration:none; font-size:13px; border:1px solid var(--border); padding:7px 14px; border-radius:20px;}
+  .backlink:hover{border-color:var(--accent); color:var(--accent);}
+  .timerbox{display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border); padding:6px 10px; border-radius:20px;}
+  .timerbox span{font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted); min-width:44px;}
+  .timerbtn{background:none; border:none; color:var(--accent); cursor:pointer; font-size:15px;}
+
+  .contextbox{
+    max-width:980px; margin:20px auto 0; padding:16px 22px; background:rgba(201,162,39,.08);
+    border:1px dashed rgba(201,162,39,.4); border-radius:12px; font-size:14.5px; color:#e9d9b8; display:flex; gap:12px;
+  }
+
+  .progresswrap{max-width:980px; margin:16px auto 0; padding:0 22px;}
+  .progressbar-outer{height:8px; background:var(--panel); border-radius:6px; overflow:hidden; border:1px solid var(--border);}
+  .progressbar-inner{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s ease;}
+  .progresslabel{font-size:12.5px; color:var(--muted); margin-top:6px;}
+
+  main{max-width:980px; margin:18px auto 60px; padding:0 22px; display:flex; flex-direction:column; gap:14px;}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .card.done{border-color:var(--ok);}
+  .cardhead{display:flex; align-items:center; gap:14px; padding:16px 18px; cursor:pointer;}
+  .num{
+    width:32px; height:32px; border-radius:50%; background:var(--panel2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:var(--accent2); flex-shrink:0;
+  }
+  .card.done .num{background:var(--ok); color:#0f1c14; border-color:var(--ok);}
+  .cardtitle{flex:1;}
+  .cardtitle b{font-size:15.5px;}
+  .cardtitle p{margin:2px 0 0; font-size:13px; color:var(--muted);}
+  .chev{color:var(--muted); transition:transform .2s;}
+  .card.open .chev{transform:rotate(90deg);}
+  .cardbody{display:none; padding:0 18px 18px; border-top:1px solid var(--border);}
+  .card.open .cardbody{display:block;}
+  .desc{font-size:14.5px; color:var(--text); line-height:1.6; padding-top:14px;}
+
+  .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .toggle{
+    background:transparent; border:1px solid var(--border); color:var(--muted); padding:7px 14px;
+    border-radius:8px; font-size:12.5px; cursor:pointer;
+  }
+  .toggle:hover{border-color:var(--accent2); color:var(--accent2);}
+  .hintbox, .gabbox{display:none; margin-top:12px;}
+  .hintbox.show, .gabbox.show{display:block;}
+  .hintbox{background:rgba(201,162,39,.08); border:1px dashed rgba(201,162,39,.4); border-radius:10px; padding:12px 14px; font-size:13.5px; color:#e9d9b8;}
+  .gabbox pre{
+    background:var(--editor); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+    font-family:'Fira Code',Consolas,monospace; font-size:13px; line-height:1.65; overflow:auto; margin:0; color:#e7d9c4;
+  }
+  .kw{color:#e08a3e;} .str{color:#8fbf7f;} .ann{color:#c9a227;} .cmt{color:#7d6a58;} .num{color:#7fb3d5;}
+
+  .checkline{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:13.5px; color:var(--muted);}
+  .checkline input{width:16px; height:16px; accent-color:var(--accent);}
+
+  .classref{
+    max-width:980px; margin:0 auto; padding:0 22px 4px; font-size:12.5px; color:var(--muted);
+  }
+  .classref code{background:var(--editor); border:1px solid var(--border); padding:2px 6px; border-radius:5px; color:#f0c987; font-family:'Fira Code',Consolas,monospace;}
+
+  footer{text-align:center; padding:16px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px;">🛠</span>
+    <div>Aula 04 — Prática Guiada
+      <small>Testando ServicoDeEstoque com mocks, passo a passo</small>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="timerbox">
+      <button class="timerbtn" id="timerToggle">▶</button>
+      <span id="timerDisplay">00:00</span>
+    </div>
+    <a class="backlink" href="02_demo.html">← Demonstração</a>
+    <a class="backlink" href="04_desafio.html" style="border-color:var(--accent); color:var(--accent);">Desafio →</a>
+  </div>
+</header>
+
+<div class="contextbox">
+  <span style="font-size:20px;">📦</span>
+  <div>Nesta prática você não vai reusar o <b>ServicoDePedido</b> da demonstração. O cenário agora é um <b>ServicoDeEstoque</b> que depende de um <b>RepositorioProduto</b> mockado — sem banco de dados de verdade. Siga os passos na ordem, tente escrever sozinho antes de abrir o gabarito.</div>
+</div>
+
+<div class="classref">Classe sob teste: <code>ServicoDeEstoque</code> (depende de <code>RepositorioProduto</code>) · método <code>reservar(String produtoId, int quantidade)</code> retorna <code>boolean</code> · lança <code>ProdutoNaoEncontradoException</code> se o produto não existir</div>
+
+<div class="progresswrap">
+  <div class="progressbar-outer"><div class="progressbar-inner" id="progressInner"></div></div>
+  <div class="progresslabel" id="progressLabel">0 de 6 passos concluídos</div>
+</div>
+
+<main id="cards"></main>
+
+<footer>🛠 Aula 04 · Testes Java · @karizeviecelli · 2026</footer>
+
+<script>
+  var PASSOS = [
+    {
+      titulo: "Preparar os mocks",
+      resumo: "@Mock + @InjectMocks",
+      desc: "Crie a classe <b>ServicoDeEstoqueTest</b> anotada com <code>@ExtendWith(MockitoExtension.class)</code>, com um <code>@Mock RepositorioProduto repositorio</code> e um <code>@InjectMocks ServicoDeEstoque servico</code>.",
+      dica: "Lembre-se do exemplo 1 da demonstração: @Mock cria o dublê, @InjectMocks monta a classe real usando esse dublê.",
+      gabarito: [
+        "@ExtendWith(MockitoExtension.class)",
+        "class ServicoDeEstoqueTest {",
+        "",
+        "    @Mock",
+        "    RepositorioProduto repositorio;",
+        "",
+        "    @InjectMocks",
+        "    ServicoDeEstoque servico;",
+        "}"
+      ]
+    },
+    {
+      titulo: "Reserva com estoque suficiente",
+      resumo: "when / thenReturn",
+      desc: "Configure o mock pra devolver um <code>Produto</code> com 10 unidades em estoque, e escreva um teste que reserva 3 unidades — deve retornar <code>true</code>.",
+      dica: "Siga o padrão do exemplo 2 da demonstração: when(repositorio.buscarPorId(...)).thenReturn(produtoComEstoque).",
+      gabarito: [
+        "@Test",
+        "void deveReservarQuandoHaEstoqueSuficiente() {",
+        "    Produto produto = new Produto(\"p1\", 10);",
+        "    when(repositorio.buscarPorId(\"p1\")).thenReturn(produto);",
+        "",
+        "    boolean resultado = servico.reservar(\"p1\", 3);",
+        "",
+        "    assertTrue(resultado);",
+        "}"
+      ]
+    },
+    {
+      titulo: "Reserva com estoque insuficiente",
+      resumo: "when / thenReturn (outro cenário)",
+      desc: "Configure o mock pra devolver um produto com apenas 2 unidades, e escreva um teste que tenta reservar 5 — deve retornar <code>false</code>.",
+      dica: "É o mesmo padrão do passo anterior, só que com um produto configurado com menos estoque do que o pedido.",
+      gabarito: [
+        "@Test",
+        "void naoDeveReservarQuandoEstoqueInsuficiente() {",
+        "    Produto produto = new Produto(\"p1\", 2);",
+        "    when(repositorio.buscarPorId(\"p1\")).thenReturn(produto);",
+        "",
+        "    boolean resultado = servico.reservar(\"p1\", 5);",
+        "",
+        "    assertFalse(resultado);",
+        "}"
+      ]
+    },
+    {
+      titulo: "Produto que não existe",
+      resumo: "when retornando null",
+      desc: "Configure o mock pra devolver <code>null</code> (produto não encontrado), e verifique que o serviço lança <code>ProdutoNaoEncontradoException</code>.",
+      dica: "Combine when(...).thenReturn(null) com assertThrows, como no exemplo 2 da Aula 01 — os padrões se somam entre aulas.",
+      gabarito: [
+        "@Test",
+        "void deveLancarExcecaoQuandoProdutoNaoExiste() {",
+        "    when(repositorio.buscarPorId(\"p404\")).thenReturn(null);",
+        "",
+        "    assertThrows(",
+        "        ProdutoNaoEncontradoException.class,",
+        "        () -> servico.reservar(\"p404\", 1)",
+        "    );",
+        "}"
+      ]
+    },
+    {
+      titulo: "Confirmando que salvou",
+      resumo: "verify",
+      desc: "Escreva um teste que confirma, usando <code>verify</code>, que <code>repositorio.salvar(produto)</code> foi chamado depois de uma reserva bem-sucedida.",
+      dica: "Reveja o exemplo 4 da demonstração: verify(mock).metodo(argumento) confirma a interação, não só o retorno.",
+      gabarito: [
+        "@Test",
+        "void deveSalvarProdutoApenasQuandoReservaBemSucedida() {",
+        "    Produto produto = new Produto(\"p1\", 10);",
+        "    when(repositorio.buscarPorId(\"p1\")).thenReturn(produto);",
+        "",
+        "    servico.reservar(\"p1\", 3);",
+        "",
+        "    verify(repositorio).salvar(produto);",
+        "}"
+      ]
+    },
+    {
+      titulo: "Rodar tudo e conferir",
+      resumo: "checagem final",
+      desc: "Rode a classe <b>ServicoDeEstoqueTest</b> completa e confirme que os 4 testes passam, sem depender de nenhum banco de dados real.",
+      dica: "Se algum teste falhar, confira se o mock foi configurado (when) antes de ser usado — mocks não configurados devolvem valores vazios, não erros.",
+      gabarito: [
+        "$ mvn test",
+        "",
+        "[INFO] Running ServicoDeEstoqueTest",
+        "✅ deveReservarQuandoHaEstoqueSuficiente",
+        "✅ naoDeveReservarQuandoEstoqueInsuficiente",
+        "✅ deveLancarExcecaoQuandoProdutoNaoExiste",
+        "✅ deveSalvarProdutoApenasQuandoReservaBemSucedida",
+        "[INFO] Tests run: 4, Failures: 0"
+      ]
+    }
+  ];
+
+  var KW = /^(abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|var|void|volatile|while)$/;
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function realcar(linha) {
+    var tokens = [];
+    var i = 0, s = linha;
+    while (i < s.length) {
+      if (s[i] === '/' && s[i+1] === '/') {
+        var j = i; while (j < s.length && s[j] !== '\n') j++;
+        tokens.push('<span class="cmt">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '"') {
+        var j = i + 1;
+        while (j < s.length && s[j] !== '"') { if (s[j] === '\\') j++; j++; }
+        j++;
+        tokens.push('<span class="str">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '@') {
+        var j = i + 1; while (j < s.length && /\w/.test(s[j])) j++;
+        tokens.push('<span class="ann">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (/[a-zA-Z_$]/.test(s[i])) {
+        var j = i; while (j < s.length && /[a-zA-Z0-9_$]/.test(s[j])) j++;
+        var w = s.slice(i, j);
+        if (KW.test(w)) tokens.push('<span class="kw">' + esc(w) + '</span>');
+        else tokens.push(esc(w));
+        i = j; continue;
+      }
+      if (/[0-9]/.test(s[i])) {
+        var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++;
+        tokens.push('<span class="num">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      tokens.push(esc(s[i])); i++;
+    }
+    return tokens.join('');
+  }
+
+  var cardsEl = document.getElementById('cards');
+  var estado = PASSOS.map(function(){ return { open:false, hint:false, gab:false, done:false }; });
+
+  function render() {
+    cardsEl.innerHTML = '';
+    PASSOS.forEach(function(p, i) {
+      var st = estado[i];
+      var card = document.createElement('div');
+      card.className = 'card' + (st.open ? ' open' : '') + (st.done ? ' done' : '');
+
+      var head = document.createElement('div');
+      head.className = 'cardhead';
+      head.innerHTML =
+        '<div class="num">' + (st.done ? '✓' : (i + 1)) + '</div>' +
+        '<div class="cardtitle"><b>' + p.titulo + '</b><p>' + p.resumo + '</p></div>' +
+        '<div class="chev">›</div>';
+      head.onclick = function () { st.open = !st.open; render(); };
+      card.appendChild(head);
+
+      var body = document.createElement('div');
+      body.className = 'cardbody';
+      body.innerHTML =
+        '<div class="desc">' + p.desc + '</div>' +
+        '<div class="row">' +
+          '<button class="toggle" data-a="hint">💡 Dica</button>' +
+          '<button class="toggle" data-a="gab">📖 Ver gabarito</button>' +
+        '</div>' +
+        '<div class="hintbox' + (st.hint ? ' show' : '') + '">' + p.dica + '</div>' +
+        '<div class="gabbox' + (st.gab ? ' show' : '') + '"><pre>' + p.gabarito.map(realcar).join('\n') + '</pre></div>' +
+        '<label class="checkline"><input type="checkbox" ' + (st.done ? 'checked' : '') + '> Marquei este passo como concluído</label>';
+
+      body.querySelector('[data-a="hint"]').onclick = function (e) { e.stopPropagation(); st.hint = !st.hint; render(); };
+      body.querySelector('[data-a="gab"]').onclick = function (e) { e.stopPropagation(); st.gab = !st.gab; render(); };
+      body.querySelector('input[type="checkbox"]').onclick = function (e) { st.done = e.target.checked; render(); };
+
+      card.appendChild(body);
+      cardsEl.appendChild(card);
+    });
+    atualizarProgresso();
+  }
+
+  function atualizarProgresso() {
+    var feitos = estado.filter(function (s) { return s.done; }).length;
+    var pct = (feitos / PASSOS.length) * 100;
+    document.getElementById('progressInner').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = feitos + ' de ' + PASSOS.length + ' passos concluídos';
+  }
+
+  estado[0].open = true;
+  render();
+
+  var segundos = 0, rodando = false, intervalo = null;
+  document.getElementById('timerToggle').onclick = function () {
+    rodando = !rodando;
+    this.textContent = rodando ? '⏸' : '▶';
+    if (rodando) {
+      intervalo = setInterval(function () {
+        segundos++;
+        var m = Math.floor(segundos / 60), s = segundos % 60;
+        document.getElementById('timerDisplay').textContent =
+          (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      }, 1000);
+    } else {
+      clearInterval(intervalo);
+    }
+  };
+</script>
+</body>
+</html>
