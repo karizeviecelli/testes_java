@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 01 — Exposição · JUnit 5 & Primeiro Teste</title>
+<style>
+  :root{
+    --bg:#1b140f; --bg2:#241b14; --panel:#2a1f17; --panel2:#332619;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 20% 15%, #2b2015 0%, var(--bg) 55%);
+    color:var(--text); display:flex; flex-direction:column; min-height:100vh; overflow:hidden;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; border-bottom:1px solid var(--border); background:rgba(0,0,0,.15);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.3px;}
+  .brand .cup{font-size:22px;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .timer{
+    font-variant-numeric:tabular-nums; background:var(--panel); border:1px solid var(--border);
+    padding:6px 14px; border-radius:20px; font-size:13px; color:var(--muted);
+  }
+  main{flex:1; display:flex; align-items:center; justify-content:center; position:relative; padding:20px;}
+  .deck{width:min(920px,92vw); height:min(520px,72vh); position:relative;}
+  .slide{
+    position:absolute; inset:0; background:linear-gradient(160deg,var(--panel),var(--panel2));
+    border:1px solid var(--border); border-radius:18px; padding:44px 52px;
+    display:none; flex-direction:column; justify-content:center; gap:18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35); opacity:0; transform:translateX(30px);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .slide.active{display:flex; opacity:1; transform:translateX(0);}
+  .eyebrow{color:var(--accent); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;}
+  h1{font-size:38px; margin:0; line-height:1.15;}
+  h2{font-size:28px; margin:0 0 4px 0; color:var(--text);}
+  p.lead{font-size:17px; color:var(--muted); line-height:1.6; margin:0; max-width:640px;}
+  ul.points{list-style:none; margin:0; padding:0; display:grid; gap:12px;}
+  ul.points li{
+    display:flex; gap:12px; align-items:flex-start; font-size:16px; color:var(--text);
+    background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 16px;
+  }
+  ul.points li b{color:var(--accent2);}
+  .badge{display:inline-flex; align-items:center; gap:6px; background:rgba(224,138,62,.12); color:var(--accent);
+    border:1px solid rgba(224,138,62,.4); padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; width:fit-content;}
+  code.inline{background:rgba(0,0,0,.35); border:1px solid var(--border); padding:2px 8px; border-radius:6px; font-family:'Fira Code',Consolas,monospace; color:#f0c987;}
+  pre.codebox{
+    background:#160f0a; border:1px solid var(--border); border-radius:12px; padding:18px 20px;
+    font-family:'Fira Code',Consolas,monospace; font-size:14px; line-height:1.65; overflow:auto; color:#e7d9c4; margin:0;
+  }
+  .kw{color:#e08a3e;} .str{color:#8fbf7f;} .ann{color:#c9a227;} .cmt{color:#7d6a58;}
+  .analogy{
+    display:flex; gap:12px; align-items:flex-start; background:rgba(201,162,39,.08);
+    border:1px dashed rgba(201,162,39,.4); border-radius:12px; padding:14px 16px; font-size:14.5px; color:#e9d9b8;
+  }
+  .analogy .ic{font-size:20px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .cta{
+    align-self:flex-start; margin-top:6px; background:linear-gradient(135deg,var(--accent),#b5651d); color:#1b140f;
+    border:none; padding:12px 22px; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer;
+    box-shadow:0 8px 20px rgba(224,138,62,.3);
+  }
+  nav.ctrl{
+    display:flex; align-items:center; justify-content:center; gap:18px; padding:18px;
+    border-top:1px solid var(--border); background:rgba(0,0,0,.15);
+  }
+  .navbtn{
+    background:var(--panel); border:1px solid var(--border); color:var(--text); width:42px; height:42px;
+    border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:.2s;
+  }
+  .navbtn:hover{background:var(--accent); color:#1b140f; border-color:var(--accent);}
+  .navbtn:disabled{opacity:.3; cursor:default;}
+  .navbtn:disabled:hover{background:var(--panel); color:var(--text); border-color:var(--border);}
+  .dots{display:flex; gap:8px;}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--border); cursor:pointer; transition:.2s;}
+  .dot.active{background:var(--accent); width:22px; border-radius:5px;}
+  .progressbar{position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease; z-index:10;}
+  .counter{color:var(--muted); font-size:13px; min-width:48px; text-align:center;}
+  footer.brandfoot{text-align:center; padding:8px; font-size:11px; color:var(--muted); letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<div class="progressbar" id="progressbar" style="width:6.66%"></div>
+<header>
+  <div class="brand">
+    <span class="cup">☕</span>
+    <div>
+      Aula 01 — JUnit 5 &amp; Primeiro Teste
+      <small>Desenvolvimento de Sistemas · Testes em Java</small>
+    </div>
+  </div>
+  <div class="timer" id="timer">00:00</div>
+</header>
+
+<main>
+  <div class="deck" id="deck">
+
+    <section class="slide active" data-index="0">
+      <span class="eyebrow">Bloco 1 · Fundamentos de JUnit 5</span>
+      <h1>JUnit 5 &amp; o Primeiro Teste</h1>
+      <p class="lead">Hoje você vai deixar de confiar "de olho" que seu código funciona e passar a provar isso, de forma automática e repetível.</p>
+      <span class="badge">⏱️ Aula 01 · Duração 4h</span>
+    </section>
+
+    <section class="slide" data-index="1">
+      <span class="eyebrow">Motivação</span>
+      <h2>Por que testar automaticamente?</h2>
+      <div class="analogy">
+        <span class="ic">🍞</span>
+        <div>Pense num padeiro que, antes de vender o pão, sempre corta uma fatia da primeira fornada para provar. Ele não confia "no olho" — ele <b>verifica</b>. Um teste automatizado é essa fatia: uma verificação rápida e repetível, toda vez que o "forno" (seu código) faz uma nova fornada.</div>
+      </div>
+      <ul class="points">
+        <li>🐢 <div><b>Teste manual</b> é lento, cansativo e você esquece de repetir depois de cada mudança.</div></li>
+        <li>🤖 <div><b>Teste automatizado</b> roda em segundos, sempre do mesmo jeito, e avisa exatamente o que quebrou.</div></li>
+        <li>🛡️ <div>Funciona como uma <b>rede de segurança</b>: você refatora sem medo de quebrar algo que já funcionava.</div></li>
+      </ul>
+    </section>
+
+    <section class="slide" data-index="2">
+      <span class="eyebrow">O framework</span>
+      <h2>O que é o JUnit 5?</h2>
+      <p class="lead">JUnit 5 é o framework padrão de testes para Java. Ele é dividido em três partes que trabalham juntas:</p>
+      <ul class="points">
+        <li>🧩 <div><b>JUnit Platform</b> — o "motor" que descobre e executa os testes.</div></li>
+        <li>⭐ <div><b>JUnit Jupiter</b> — a API que você usa no dia a dia: <code class="inline">@Test</code>, <code class="inline">assertEquals</code>, etc.</div></li>
+        <li>🕰️ <div><b>JUnit Vintage</b> — camada de compatibilidade para rodar testes antigos (JUnit 3/4).</div></li>
+      </ul>
+    </section>
+
+    <section class="slide" data-index="3">
+      <span class="eyebrow">Anatomia</span>
+      <h2>Como é um teste, na prática?</h2>
+      <pre class="codebox"><span class="ann">@Test</span>
+<span class="kw">void</span> <span class="str">deveSomarDoisNumeros</span>() {
+    Calculadora c = <span class="kw">new</span> Calculadora();
+    <span class="kw">int</span> resultado = c.somar(2, 3);
+    assertEquals(5, resultado);
+}</pre>
+      <div class="analogy">
+        <span class="ic">🔎</span>
+        <div>A anotação <code class="inline">@Test</code> é como uma etiqueta de "isto aqui é um caso de verificação" — o JUnit procura por ela para saber o que precisa executar.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-index="4">
+      <span class="eyebrow">Estrutura</span>
+      <h2>O padrão AAA</h2>
+      <div class="grid2">
+        <div class="analogy"><span class="ic">🧾</span><div><b>Arrange</b> — separar os ingredientes: criar objetos e preparar os dados de entrada.</div></div>
+        <div class="analogy"><span class="ic">🍳</span><div><b>Act</b> — cozinhar: chamar o método que você quer testar.</div></div>
+      </div>
+      <div class="analogy"><span class="ic">👅</span><div><b>Assert</b> — provar o prato: comparar o resultado obtido com o resultado esperado.</div></div>
+      <p class="lead">Todo teste bem escrito segue essas três etapas, nessa ordem — mesmo que não estejam comentadas no código.</p>
+    </section>
+
+    <section class="slide" data-index="5">
+      <span class="eyebrow">Verificações</span>
+      <h2>Assertions básicas</h2>
+      <ul class="points">
+        <li><code class="inline">assertEquals(esperado, obtido)</code> <div>— compara dois valores.</div></li>
+        <li><code class="inline">assertTrue(condição)</code> / <code class="inline">assertFalse(condição)</code> <div>— valida uma expressão booleana.</div></li>
+        <li><code class="inline">assertNotNull(objeto)</code> <div>— garante que algo foi de fato criado.</div></li>
+        <li><code class="inline">assertThrows(Exceção.class, () -&gt; ...)</code> <div>— confirma que um erro esperado realmente acontece.</div></li>
+      </ul>
+    </section>
+
+    <section class="slide" data-index="6">
+      <span class="eyebrow">Ciclo de vida</span>
+      <h2>@BeforeEach e @AfterEach</h2>
+      <div class="analogy">
+        <span class="ic">🧹</span>
+        <div>É como arrumar a bancada da cozinha <b>antes</b> de cada prato e limpar tudo <b>depois</b>. Cada teste começa do zero, sem "sujeira" deixada pelo teste anterior.</div>
+      </div>
+      <pre class="codebox"><span class="ann">@BeforeEach</span>
+<span class="kw">void</span> <span class="str">preparar</span>() {
+    calculadora = <span class="kw">new</span> Calculadora();
+}</pre>
+    </section>
+
+    <section class="slide" data-index="7">
+      <span class="eyebrow">Boas práticas</span>
+      <h2>Nomeando e organizando testes</h2>
+      <ul class="points">
+        <li>📛 <div>Nomes descritivos: <code class="inline">deveLancarExcecaoQuandoDivideParZero</code> em vez de <code class="inline">teste1</code>.</div></li>
+        <li>🏷️ <div><code class="inline">@DisplayName("...")</code> permite escrever a intenção em linguagem natural.</div></li>
+        <li>📁 <div>A classe de teste normalmente fica em <code class="inline">src/test/java</code>, espelhando o pacote da classe original.</div></li>
+      </ul>
+    </section>
+
+    <section class="slide" data-index="8">
+      <span class="eyebrow">Fechamento</span>
+      <h2>O que vem a seguir</h2>
+      <p class="lead">Agora que você conhece a anatomia de um teste, o padrão AAA e o ciclo de vida com JUnit 5, é hora de ver tudo isso rodando de verdade, com vários exemplos comentados.</p>
+      <button class="cta" onclick="window.location.href='02_demo.html'">Ir para a Demonstração →</button>
+    </section>
+
+  </div>
+</main>
+
+<nav class="ctrl">
+  <button class="navbtn" id="prevBtn" onclick="go(-1)">‹</button>
+  <div class="dots" id="dots"></div>
+  <span class="counter" id="counter">1/9</span>
+  <button class="navbtn" id="nextBtn" onclick="go(1)">›</button>
+</nav>
+<footer class="brandfoot">☕ Aula 01 · Desenvolvimento de Sistemas · @karizeviecelli · 2026</footer>
+
+<script>
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var idx = 0;
+
+  var dotsEl = document.getElementById('dots');
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('data-i', i);
+    d.onclick = (function(n){ return function(){ show(n); }; })(i);
+    dotsEl.appendChild(d);
+  }
+  var dots = document.querySelectorAll('.dot');
+
+  function show(n) {
+    if (n < 0 || n >= total) return;
+    slides[idx].classList.remove('active');
+    dots[idx].classList.remove('active');
+    idx = n;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx + 1) + '/' + total;
+    document.getElementById('progressbar').style.width = (((idx + 1) / total) * 100) + '%';
+    document.getElementById('prevBtn').disabled = (idx === 0);
+    document.getElementById('nextBtn').disabled = (idx === total - 1);
+  }
+
+  function go(delta) { show(idx + delta); }
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+
+  show(0);
+
+  var seconds = 0;
+  setInterval(function(){
+    seconds++;
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    document.getElementById('timer').textContent =
+      (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 01 — Demonstração · JUnit 5 & Primeiro Teste</title>
+<style>
+  :root{
+    --bg:#1b140f; --panel:#241a14; --panel2:#2c2015; --editor:#150f0a;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 15% 10%, #2b2015 0%, var(--bg) 55%); color:var(--text); min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,.15); flex-wrap:wrap; gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .backlink{color:var(--muted); text-decoration:none; font-size:13px; border:1px solid var(--border); padding:7px 14px; border-radius:20px;}
+  .backlink:hover{border-color:var(--accent); color:var(--accent);}
+
+  .examples{display:flex; gap:8px; flex-wrap:wrap; padding:16px 28px; border-bottom:1px solid var(--border);}
+  .exbtn{
+    background:var(--panel); border:1px solid var(--border); color:var(--muted); padding:9px 14px;
+    border-radius:10px; font-size:13px; cursor:pointer; text-align:left; transition:.15s; max-width:210px;
+  }
+  .exbtn b{display:block; color:var(--text); font-size:13px;}
+  .exbtn span{font-size:11px;}
+  .exbtn:hover{border-color:var(--accent2);}
+  .exbtn.active{background:linear-gradient(135deg, rgba(224,138,62,.18), rgba(201,162,39,.1)); border-color:var(--accent); color:var(--text);}
+
+  main{padding:22px 28px 40px; display:grid; grid-template-columns:1.3fr 1fr; gap:20px; max-width:1300px; margin:0 auto;}
+  @media (max-width:920px){ main{grid-template-columns:1fr;} }
+
+  .analogy{
+    display:flex; gap:12px; align-items:flex-start; background:rgba(201,162,39,.08);
+    border:1px dashed rgba(201,162,39,.4); border-radius:12px; padding:14px 16px; font-size:14.5px; color:#e9d9b8; margin-bottom:16px;
+  }
+  .analogy .ic{font-size:22px;}
+  .analogy b{color:var(--accent2);}
+
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; display:flex; flex-direction:column;}
+  .panelbar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--panel2); border-bottom:1px solid var(--border);}
+  .dot3{width:10px; height:10px; border-radius:50%;}
+  .filename{margin-left:6px; font-size:12.5px; color:var(--muted); font-family:'Fira Code',Consolas,monospace;}
+  .editor{background:var(--editor); flex:1; min-height:340px; padding:18px 20px; overflow:auto;}
+  .editor pre{
+    margin:0; font-family:'Fira Code',Consolas,monospace; font-size:13.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word;
+  }
+  .kw{color:#e08a3e;} .str{color:#8fbf7f;} .ann{color:#c9a227;} .cmt{color:#7d6a58;} .num{color:#7fb3d5;}
+  .cursor{display:inline-block; width:7px; height:15px; background:var(--accent); vertical-align:middle; animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  .controls{display:flex; gap:10px; padding:12px 14px; border-top:1px solid var(--border); background:var(--panel2); flex-wrap:wrap;}
+  .btn{
+    border:none; padding:9px 16px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; transition:.15s;
+  }
+  .btn.run{background:linear-gradient(135deg,var(--accent),#b5651d); color:#1b140f;}
+  .btn.reset{background:transparent; border:1px solid var(--border); color:var(--muted);}
+  .btn.fast{background:transparent; border:1px solid var(--border); color:var(--muted);}
+  .btn.fast.active{border-color:var(--accent2); color:var(--accent2);}
+  .btn:hover{filter:brightness(1.1);}
+
+  .console{background:var(--editor); flex:1; min-height:340px; padding:16px 18px; font-family:'Fira Code',Consolas,monospace; font-size:13px; overflow:auto;}
+  .console .line{padding:5px 0; display:flex; gap:8px; border-bottom:1px dashed rgba(255,255,255,.05);}
+  .console .ok{color:var(--ok);}
+  .console .err{color:var(--err);}
+  .console .info{color:var(--muted);}
+  .console .empty{color:var(--muted); opacity:.6; font-style:italic;}
+  .summary{padding:10px 18px; border-top:1px solid var(--border); font-size:12.5px; color:var(--muted); background:var(--panel2);}
+
+  footer{text-align:center; padding:10px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px;">☕</span>
+    <div>Aula 01 — Demonstração
+      <small>Testes Java · 7 exemplos comentados com analogias</small>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <a class="backlink" href="01_exposicao.html">← Exposição</a>
+    <a class="backlink" href="03_pratica.html" style="border-color:var(--accent); color:var(--accent);">Prática Guiada →</a>
+  </div>
+</header>
+
+<div class="examples" id="examples"></div>
+
+<main>
+  <div>
+    <div class="analogy" id="analogyBox"></div>
+    <div class="panel">
+      <div class="panelbar">
+        <span class="dot3" style="background:#e0603e;"></span>
+        <span class="dot3" style="background:#e0b03e;"></span>
+        <span class="dot3" style="background:#5cb583;"></span>
+        <span class="filename" id="filename">CalculadoraTest.java</span>
+      </div>
+      <div class="editor"><pre id="codeArea"></pre></div>
+      <div class="controls">
+        <button class="btn run" id="runBtn">▶ Executar</button>
+        <button class="btn reset" id="resetBtn">↺ Reset</button>
+        <button class="btn fast" id="fastBtn">⚡ Rápido</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelbar"><span class="filename">💻 Saída do console</span></div>
+    <div class="console" id="consoleArea"><div class="line empty">Selecione "Executar" para ver o resultado dos testes...</div></div>
+    <div class="summary" id="summary">Aguardando execução</div>
+  </div>
+</main>
+
+<footer>Aula 01 · Testes Java · @karizeviecelli · 2026</footer>
+
+<script>
+  var EXEMPLOS = [
+    {
+      titulo: "1. Primeiro teste",
+      curto: "assertEquals básico",
+      icone: "🧾",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "🥖",
+      analogia: "É como conferir o troco na padaria: você sabe quanto deveria receber e confere se o valor bate. assertEquals compara o valor esperado com o valor que o código realmente devolveu.",
+      codigo: [
+        "class CalculadoraTest {",
+        "",
+        "    @Test",
+        "    void deveSomarDoisNumeros() {",
+        "        // Arrange",
+        "        Calculadora c = new Calculadora();",
+        "",
+        "        // Act",
+        "        int resultado = c.somar(2, 3);",
+        "",
+        "        // Assert",
+        "        assertEquals(5, resultado);",
+        "    }",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando CalculadoraTest ..."},
+        {t:"ok",   m:"✅ deveSomarDoisNumeros() — esperado 5, obtido 5"},
+        {t:"info", m:"1 teste · 1 sucesso · 0 falhas · 4ms"}
+      ]
+    },
+    {
+      titulo: "2. Testando exceções",
+      curto: "assertThrows",
+      icone: "🧯",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "🧯",
+      analogia: "Um teste de exceção é como testar o fusível de segurança de casa: você provoca de propósito uma situação de curto-circuito (dividir por zero) só para confirmar que a proteção realmente desarma.",
+      codigo: [
+        "@Test",
+        "void deveLancarExcecaoAoDividirPorZero() {",
+        "    Calculadora c = new Calculadora();",
+        "",
+        "    ArithmeticException erro = assertThrows(",
+        "        ArithmeticException.class,",
+        "        () -> c.dividir(10, 0)",
+        "    );",
+        "",
+        "    assertEquals(\"/ by zero\", erro.getMessage());",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando CalculadoraTest ..."},
+        {t:"ok",   m:"✅ deveLancarExcecaoAoDividirPorZero() — exceção ArithmeticException capturada"},
+        {t:"ok",   m:"✅ mensagem da exceção confere: \"/ by zero\""},
+        {t:"info", m:"1 teste · 1 sucesso · 0 falhas · 3ms"}
+      ]
+    },
+    {
+      titulo: "3. Preparando o cenário",
+      curto: "@BeforeEach",
+      icone: "🧹",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "🍳",
+      analogia: "É o mise en place da cozinha: antes de cada prato (cada teste), a bancada é arrumada do zero. @BeforeEach roda antes de todo teste, garantindo que nenhum objeto de um teste \"vaze\" para o próximo.",
+      codigo: [
+        "class CalculadoraTest {",
+        "",
+        "    Calculadora calculadora;",
+        "",
+        "    @BeforeEach",
+        "    void preparar() {",
+        "        calculadora = new Calculadora();",
+        "    }",
+        "",
+        "    @Test",
+        "    void deveMultiplicarDoisNumeros() {",
+        "        int resultado = calculadora.multiplicar(4, 5);",
+        "        assertEquals(20, resultado);",
+        "    }",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"🧹 preparar() executado antes do teste"},
+        {t:"ok",   m:"✅ deveMultiplicarDoisNumeros() — esperado 20, obtido 20"},
+        {t:"info", m:"1 teste · 1 sucesso · 0 falhas · 2ms"}
+      ]
+    },
+    {
+      titulo: "4. Vários checks de uma vez",
+      curto: "assertAll",
+      icone: "🚗",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "🚗",
+      analogia: "Pense na inspeção veicular anual: o mecânico não para no primeiro item reprovado, ele confere freios, luzes e pneus e te entrega o laudo completo. assertAll faz o mesmo: roda todas as verificações e mostra tudo que falhou, não só a primeira.",
+      codigo: [
+        "@Test",
+        "void deveValidarVariasOperacoesAoMesmoTempo() {",
+        "    Calculadora c = new Calculadora();",
+        "",
+        "    assertAll(\"operações básicas\",",
+        "        () -> assertEquals(7, c.somar(3, 4)),",
+        "        () -> assertEquals(1, c.subtrair(4, 3)),",
+        "        () -> assertEquals(12, c.multiplicar(3, 4))",
+        "    );",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando grupo \"operações básicas\""},
+        {t:"ok",   m:"✅ somar(3, 4) — esperado 7, obtido 7"},
+        {t:"ok",   m:"✅ subtrair(4, 3) — esperado 1, obtido 1"},
+        {t:"ok",   m:"✅ multiplicar(3, 4) — esperado 12, obtido 12"},
+        {t:"info", m:"1 teste · 3 verificações · 0 falhas · 3ms"}
+      ]
+    },
+    {
+      titulo: "5. Igualdade x identidade",
+      curto: "assertEquals vs assertSame",
+      icone: "👯",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "👯",
+      analogia: "Dois gêmeos idênticos parecem exatamente iguais, mas são duas pessoas diferentes. assertEquals compara a \"aparência\" (o conteúdo); assertSame/assertNotSame compara se é literalmente o mesmo objeto na memória.",
+      codigo: [
+        "@Test",
+        "void deveDiferenciarIgualdadeDeIdentidade() {",
+        "    String a = new String(\"junit\");",
+        "    String b = new String(\"junit\");",
+        "",
+        "    assertEquals(a, b);",
+        "    assertNotSame(a, b);",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando CalculadoraTest ..."},
+        {t:"ok",   m:"✅ assertEquals(a, b) — mesmo conteúdo \"junit\""},
+        {t:"ok",   m:"✅ assertNotSame(a, b) — objetos distintos na memória"},
+        {t:"info", m:"1 teste · 2 verificações · 0 falhas · 2ms"}
+      ]
+    },
+    {
+      titulo: "6. Nomes legíveis",
+      curto: "@DisplayName",
+      icone: "🏷️",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "🏷️",
+      analogia: "É a etiqueta de prateleira do supermercado: em vez de um código interno (SKU-0231), o cliente lê \"Arroz integral 1kg\". @DisplayName troca o nome técnico do método por uma frase que qualquer pessoa da equipe entende no relatório.",
+      codigo: [
+        "@Test",
+        "@DisplayName(\"Deve retornar zero ao somar dois números opostos\")",
+        "void testeSomaOpostos() {",
+        "    Calculadora c = new Calculadora();",
+        "    assertEquals(0, c.somar(5, -5));",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando CalculadoraTest ..."},
+        {t:"ok",   m:"✅ Deve retornar zero ao somar dois números opostos"},
+        {t:"info", m:"1 teste · 1 sucesso · 0 falhas · 2ms"}
+      ]
+    },
+    {
+      titulo: "7. Tudo junto: padrão AAA",
+      curto: "cenário completo",
+      icone: "🎂",
+      arquivo: "CalculadoraTest.java",
+      analogiaIcone: "🎂",
+      analogia: "Uma receita de bolo tem ordem: separar os ingredientes, misturar e assar, depois provar. Esse exemplo junta tudo que vimos — Arrange, Act, Assert — num teste só, incluindo uma margem de erro para números decimais.",
+      codigo: [
+        "@Test",
+        "void deveCalcularMediaDeNotas() {",
+        "    // Arrange",
+        "    Calculadora c = new Calculadora();",
+        "    double[] notas = {7.5, 8.0, 9.0};",
+        "",
+        "    // Act",
+        "    double media = c.calcularMedia(notas);",
+        "",
+        "    // Assert",
+        "    assertEquals(8.16, media, 0.01);",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando CalculadoraTest ..."},
+        {t:"ok",   m:"✅ deveCalcularMediaDeNotas() — esperado 8.16, obtido 8.17 (margem 0.01)"},
+        {t:"info", m:"1 teste · 1 sucesso · 0 falhas · 3ms"}
+      ]
+    }
+  ];
+
+  var KW = /^(abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|var|void|volatile|while)$/;
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function realcar(linha) {
+    var tokens = [];
+    var i = 0, s = linha;
+    while (i < s.length) {
+      if (s[i] === '/' && s[i+1] === '/') {
+        var j = i; while (j < s.length && s[j] !== '\n') j++;
+        tokens.push('<span class="cmt">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '"') {
+        var j = i + 1;
+        while (j < s.length && s[j] !== '"') { if (s[j] === '\\') j++; j++; }
+        j++;
+        tokens.push('<span class="str">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '@') {
+        var j = i + 1; while (j < s.length && /\w/.test(s[j])) j++;
+        tokens.push('<span class="ann">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (/[a-zA-Z_$]/.test(s[i])) {
+        var j = i; while (j < s.length && /[a-zA-Z0-9_$]/.test(s[j])) j++;
+        var w = s.slice(i, j);
+        if (KW.test(w)) tokens.push('<span class="kw">' + esc(w) + '</span>');
+        else tokens.push(esc(w));
+        i = j; continue;
+      }
+      if (/[0-9]/.test(s[i])) {
+        var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++;
+        tokens.push('<span class="num">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      tokens.push(esc(s[i])); i++;
+    }
+    return tokens.join('');
+  }
+
+  var atual = 0;
+  var rapido = false;
+  var digitando = null;
+
+  var exContainer = document.getElementById('examples');
+  EXEMPLOS.forEach(function(ex, i) {
+    var b = document.createElement('button');
+    b.className = 'exbtn' + (i === 0 ? ' active' : '');
+    b.innerHTML = '<b>' + ex.icone + ' ' + ex.titulo + '</b><span>' + ex.curto + '</span>';
+    b.onclick = function(){ selecionar(i); };
+    exContainer.appendChild(b);
+  });
+  var botoes = document.querySelectorAll('.exbtn');
+
+  function selecionar(i) {
+    atual = i;
+    botoes.forEach(function(b, n){ b.classList.toggle('active', n === i); });
+    var ex = EXEMPLOS[i];
+    document.getElementById('filename').textContent = ex.arquivo;
+    document.getElementById('analogyBox').innerHTML =
+      '<span class="ic">' + ex.analogiaIcone + '</span><div><b>Analogia:</b> ' + ex.analogia + '</div>';
+    resetar();
+    digitar();
+  }
+
+  function resetar() {
+    if (digitando) clearInterval(digitando);
+    document.getElementById('codeArea').innerHTML = '';
+    document.getElementById('consoleArea').innerHTML = '<div class="line empty">Selecione "Executar" para ver o resultado dos testes...</div>';
+    document.getElementById('summary').textContent = 'Aguardando execução';
+  }
+
+  function digitar() {
+    if (digitando) clearInterval(digitando);
+    var ex = EXEMPLOS[atual];
+    var textoCompleto = ex.codigo.join('\n');
+    var codeArea = document.getElementById('codeArea');
+
+    if (rapido) {
+      codeArea.innerHTML = ex.codigo.map(realcar).join('\n');
+      mostrarSaida();
+      return;
+    }
+
+    var pos = 0;
+    codeArea.textContent = '';
+    digitando = setInterval(function () {
+      pos += 3;
+      if (pos >= textoCompleto.length) {
+        pos = textoCompleto.length;
+        clearInterval(digitando);
+        codeArea.innerHTML = ex.codigo.map(realcar).join('\n');
+        setTimeout(mostrarSaida, 350);
+        return;
+      }
+      codeArea.textContent = textoCompleto.slice(0, pos);
+      codeArea.innerHTML += '<span class="cursor"></span>';
+    }, 12);
+  }
+
+  function mostrarSaida() {
+    var ex = EXEMPLOS[atual];
+    var consoleArea = document.getElementById('consoleArea');
+    consoleArea.innerHTML = '';
+    var ok = 0, total = 0;
+    ex.saida.forEach(function (linha, idx) {
+      setTimeout(function () {
+        var div = document.createElement('div');
+        div.className = 'line ' + linha.t;
+        div.textContent = linha.m;
+        consoleArea.appendChild(div);
+        consoleArea.scrollTop = consoleArea.scrollHeight;
+        if (linha.t === 'ok') ok++;
+        if (linha.t === 'ok' || linha.t === 'err') total++;
+        document.getElementById('summary').textContent =
+          ok + ' verificação(ões) ok de ' + total + ' até agora';
+      }, rapido ? 0 : idx * 220);
+    });
+  }
+
+  document.getElementById('runBtn').onclick = function () { digitar(); };
+  document.getElementById('resetBtn').onclick = function () { resetar(); };
+  document.getElementById('fastBtn').onclick = function () {
+    rapido = !rapido;
+    this.classList.toggle('active', rapido);
+    this.textContent = rapido ? '⚡ Rápido (ligado)' : '⚡ Rápido';
+  };
+
+  selecionar(0);
+</script>
+</body>
+</html>
