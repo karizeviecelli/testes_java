@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 03 — Desafio · TDD: Red, Green, Refactor</title>
+<style>
+  :root{
+    --bg:#1b140f; --panel:#241a14; --panel2:#2c2015; --editor:#150f0a;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 15% 10%, #2b2015 0%, var(--bg) 55%); color:var(--text); min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,.15); flex-wrap:wrap; gap:12px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .backlink{color:var(--muted); text-decoration:none; font-size:13px; border:1px solid var(--border); padding:7px 14px; border-radius:20px;}
+  .backlink:hover{border-color:var(--accent); color:var(--accent);}
+
+  main{max-width:900px; margin:0 auto; padding:26px 22px 60px;}
+
+  .missionbox{
+    background:linear-gradient(160deg,var(--panel),var(--panel2)); border:1px solid var(--border); border-radius:16px;
+    padding:26px 28px; display:flex; flex-direction:column; gap:14px; margin-bottom:22px;
+  }
+  .eyebrow{color:var(--accent); font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;}
+  h1{margin:0; font-size:26px;}
+  p.lead{margin:0; color:var(--muted); font-size:15px; line-height:1.6;}
+  .classref{font-size:13px; color:var(--muted); background:var(--editor); border:1px solid var(--border); border-radius:10px; padding:12px 16px;}
+  .classref code{color:#f0c987; font-family:'Fira Code',Consolas,monospace;}
+
+  .timerpanel{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 22px; margin-bottom:22px;
+  }
+  .timerdisplay{font-size:34px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent);}
+  .timerdisplay.warn{color:var(--err); animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:.5;}}
+  .timerbtns{display:flex; gap:8px;}
+  .btn{border:none; padding:9px 16px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer;}
+  .btn.start{background:linear-gradient(135deg,var(--accent),#b5651d); color:#1b140f;}
+  .btn.pause{background:transparent; border:1px solid var(--border); color:var(--muted);}
+  .btn.reset{background:transparent; border:1px solid var(--border); color:var(--muted);}
+
+  .progresswrap{margin-bottom:18px;}
+  .progressbar-outer{height:8px; background:var(--panel); border-radius:6px; overflow:hidden; border:1px solid var(--border);}
+  .progressbar-inner{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s ease;}
+  .progresslabel{font-size:12.5px; color:var(--muted); margin-top:6px;}
+
+  .reqs{display:flex; flex-direction:column; gap:10px; margin-bottom:24px;}
+  .req{
+    display:flex; gap:12px; align-items:flex-start; background:var(--panel); border:1px solid var(--border);
+    border-radius:12px; padding:14px 16px; cursor:pointer; transition:.15s;
+  }
+  .req.done{border-color:var(--ok); background:rgba(92,181,131,.06);}
+  .req input{width:18px; height:18px; margin-top:1px; accent-color:var(--ok); flex-shrink:0;}
+  .req .txt b{display:block; font-size:14.5px;}
+  .req .txt span{font-size:12.5px; color:var(--muted);}
+
+  .criteria{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:24px;
+  }
+  .criteria h3{margin:0 0 10px; font-size:15px; color:var(--accent2);}
+  .criteria ul{margin:0; padding-left:20px; font-size:13.5px; color:var(--muted); line-height:1.8;}
+
+  .submitbar{display:flex; justify-content:flex-end;}
+  .btn.submit{
+    background:linear-gradient(135deg,var(--ok),#2f7d52); color:#0f1c14; padding:13px 24px; font-size:14.5px;
+    opacity:.4; pointer-events:none;
+  }
+  .btn.submit.enabled{opacity:1; pointer-events:auto; box-shadow:0 10px 24px rgba(92,181,131,.3);}
+
+  footer{text-align:center; padding:16px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px;">🏆</span>
+    <div>Aula 03 — Desafio
+      <small>Missão autônoma · sem gabarito</small>
+    </div>
+  </div>
+  <a class="backlink" href="03_pratica.html">← Prática Guiada</a>
+</header>
+
+<main>
+  <div class="missionbox">
+    <span class="eyebrow">🔠 Missão</span>
+    <h1>Construa o ContadorDeVogais do zero, em TDD</h1>
+    <p class="lead">Diferente das últimas missões, <b>não existe nenhuma classe de produção pronta</b> — você vai criá-la sozinho, em pequenos ciclos vermelho-verde-refactor, movido pelos testes, como fez com <b>SomaDeTexto</b> (demonstração) e <b>FizzBuzz</b> (prática guiada).</p>
+    <div class="classref">
+      Objetivo final: uma classe <code>ContadorDeVogais</code> com um método <code>contar(String texto)</code> que retorna <code>int</code> — a quantidade de vogais (a, e, i, o, u) na string, ignorando maiúsculas/minúsculas
+    </div>
+  </div>
+
+  <div class="timerpanel">
+    <div>
+      <div class="timerdisplay" id="timerDisplay">50:00</div>
+      <div class="progresslabel">Tempo sugerido para o desafio</div>
+    </div>
+    <div class="timerbtns">
+      <button class="btn start" id="startBtn">▶ Iniciar</button>
+      <button class="btn pause" id="pauseBtn">⏸ Pausar</button>
+      <button class="btn reset" id="resetBtn">↺ Reiniciar</button>
+    </div>
+  </div>
+
+  <div class="progresswrap">
+    <div class="progressbar-outer"><div class="progressbar-inner" id="progressInner"></div></div>
+    <div class="progresslabel" id="progressLabel">0 de 8 requisitos concluídos</div>
+  </div>
+
+  <div class="reqs" id="reqs"></div>
+
+  <div class="criteria">
+    <h3>📋 Critérios de entrega</h3>
+    <ul>
+      <li>Cada novo comportamento começou com um teste <b>vermelho</b>, escrito antes do código de produção.</li>
+      <li>Existe pelo menos um <b>refactor</b> real: a implementação mudou de forma, mas os testes continuaram passando sem alteração.</li>
+      <li>Nomes de teste descrevem claramente o comportamento verificado.</li>
+      <li>A suíte roda 100% verde ao final, cobrindo string vazia, sem vogais e com vogais repetidas.</li>
+    </ul>
+  </div>
+
+  <div class="submitbar">
+    <button class="btn submit" id="submitBtn">Ir para o Feedback →</button>
+  </div>
+</main>
+
+<footer>🏆 Aula 03 · Testes Java · @karizeviecelli · 2026</footer>
+
+<script>
+  var REQUISITOS = [
+    { titulo: "Ciclo 1 — string vazia", desc: "Vermelho: contar(\"\") deve retornar 0, antes da classe existir. Verde: implementação mínima." },
+    { titulo: "Ciclo 2 — sem vogais", desc: "Vermelho: uma palavra sem vogais (ex.: \"pfft\") deve retornar 0. Verde: evoluir a implementação." },
+    { titulo: "Ciclo 3 — vogais repetidas", desc: "Vermelho: uma palavra só de vogais (ex.: \"aeiou\") deve retornar 5. Verde: generalizar a contagem." },
+    { titulo: "Ciclo 4 — maiúsculas e minúsculas", desc: "Vermelho: uma palavra com vogais maiúsculas (ex.: \"AEIOU\") também deve retornar 5." },
+    { titulo: "Ciclo 5 — palavra comum", desc: "Vermelho: uma palavra do dia a dia (ex.: \"programando\") com o número certo de vogais contado manualmente." },
+    { titulo: "Refactor real", desc: "Reescrever a implementação (ex.: usando stream ou regex) sem quebrar nenhum teste já escrito." },
+    { titulo: "Nomes descritivos", desc: "Cada teste tem um nome que deixa claro qual comportamento está sendo verificado." },
+    { titulo: "Suíte 100% verde", desc: "Rodar todos os testes da classe e confirmar que todos passam ao final." }
+  ];
+
+  var estado = REQUISITOS.map(function () { return false; });
+
+  var reqsEl = document.getElementById('reqs');
+  function render() {
+    reqsEl.innerHTML = '';
+    REQUISITOS.forEach(function (r, i) {
+      var div = document.createElement('div');
+      div.className = 'req' + (estado[i] ? ' done' : '');
+      div.innerHTML =
+        '<input type="checkbox" ' + (estado[i] ? 'checked' : '') + '>' +
+        '<div class="txt"><b>' + (i + 1) + '. ' + r.titulo + '</b><span>' + r.desc + '</span></div>';
+      div.onclick = function (e) {
+        estado[i] = !estado[i];
+        render();
+      };
+      reqsEl.appendChild(div);
+    });
+    atualizar();
+  }
+
+  function atualizar() {
+    var feitos = estado.filter(Boolean).length;
+    var pct = (feitos / REQUISITOS.length) * 100;
+    document.getElementById('progressInner').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = feitos + ' de ' + REQUISITOS.length + ' requisitos concluídos';
+    var submitBtn = document.getElementById('submitBtn');
+    submitBtn.classList.toggle('enabled', feitos === REQUISITOS.length);
+  }
+
+  render();
+
+  document.getElementById('submitBtn').onclick = function () {
+    if (this.classList.contains('enabled')) window.location.href = '05_feedback.html';
+  };
+
+  var totalSegundos = 50 * 60;
+  var restante = totalSegundos;
+  var intervalo = null;
+
+  function atualizarTimer() {
+    var m = Math.floor(restante / 60), s = restante % 60;
+    var el = document.getElementById('timerDisplay');
+    el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    el.classList.toggle('warn', restante <= 300);
+  }
+
+  document.getElementById('startBtn').onclick = function () {
+    if (intervalo) return;
+    intervalo = setInterval(function () {
+      if (restante > 0) {
+        restante--;
+        atualizarTimer();
+      } else {
+        clearInterval(intervalo);
+        intervalo = null;
+      }
+    }, 1000);
+  };
+  document.getElementById('pauseBtn').onclick = function () {
+    clearInterval(intervalo);
+    intervalo = null;
+  };
+  document.getElementById('resetBtn').onclick = function () {
+    clearInterval(intervalo);
+    intervalo = null;
+    restante = totalSegundos;
+    atualizarTimer();
+  };
+
+  atualizarTimer();
+</script>
+</body>
+</html>

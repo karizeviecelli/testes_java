@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 03 — Demonstração · TDD: Red, Green, Refactor</title>
+<style>
+  :root{
+    --bg:#1b140f; --panel:#241a14; --panel2:#2c2015; --editor:#150f0a;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 15% 10%, #2b2015 0%, var(--bg) 55%); color:var(--text); min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,.15); flex-wrap:wrap; gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .backlink{color:var(--muted); text-decoration:none; font-size:13px; border:1px solid var(--border); padding:7px 14px; border-radius:20px;}
+  .backlink:hover{border-color:var(--accent); color:var(--accent);}
+
+  .examples{display:flex; gap:8px; flex-wrap:wrap; padding:16px 28px; border-bottom:1px solid var(--border);}
+  .exbtn{
+    background:var(--panel); border:1px solid var(--border); color:var(--muted); padding:9px 14px;
+    border-radius:10px; font-size:13px; cursor:pointer; text-align:left; transition:.15s; max-width:210px;
+  }
+  .exbtn b{display:block; color:var(--text); font-size:13px;}
+  .exbtn span{font-size:11px;}
+  .exbtn:hover{border-color:var(--accent2);}
+  .exbtn.active{background:linear-gradient(135deg, rgba(224,138,62,.18), rgba(201,162,39,.1)); border-color:var(--accent); color:var(--text);}
+
+  main{padding:22px 28px 40px; display:grid; grid-template-columns:1.3fr 1fr; gap:20px; max-width:1300px; margin:0 auto;}
+  @media (max-width:920px){ main{grid-template-columns:1fr;} }
+
+  .analogy{
+    display:flex; gap:12px; align-items:flex-start; background:rgba(201,162,39,.08);
+    border:1px dashed rgba(201,162,39,.4); border-radius:12px; padding:14px 16px; font-size:14.5px; color:#e9d9b8; margin-bottom:16px;
+  }
+  .analogy .ic{font-size:22px;}
+  .analogy b{color:var(--accent2);}
+
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; display:flex; flex-direction:column;}
+  .panelbar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--panel2); border-bottom:1px solid var(--border);}
+  .dot3{width:10px; height:10px; border-radius:50%;}
+  .filename{margin-left:6px; font-size:12.5px; color:var(--muted); font-family:'Fira Code',Consolas,monospace;}
+  .editor{background:var(--editor); flex:1; min-height:340px; padding:18px 20px; overflow:auto;}
+  .editor pre{
+    margin:0; font-family:'Fira Code',Consolas,monospace; font-size:13.5px; line-height:1.7; white-space:pre-wrap; word-break:break-word;
+  }
+  .kw{color:#e08a3e;} .str{color:#8fbf7f;} .ann{color:#c9a227;} .cmt{color:#7d6a58;} .num{color:#7fb3d5;}
+  .cursor{display:inline-block; width:7px; height:15px; background:var(--accent); vertical-align:middle; animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  .controls{display:flex; gap:10px; padding:12px 14px; border-top:1px solid var(--border); background:var(--panel2); flex-wrap:wrap;}
+  .btn{
+    border:none; padding:9px 16px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; transition:.15s;
+  }
+  .btn.run{background:linear-gradient(135deg,var(--accent),#b5651d); color:#1b140f;}
+  .btn.reset{background:transparent; border:1px solid var(--border); color:var(--muted);}
+  .btn.fast{background:transparent; border:1px solid var(--border); color:var(--muted);}
+  .btn.fast.active{border-color:var(--accent2); color:var(--accent2);}
+  .btn:hover{filter:brightness(1.1);}
+
+  .console{background:var(--editor); flex:1; min-height:340px; padding:16px 18px; font-family:'Fira Code',Consolas,monospace; font-size:13px; overflow:auto;}
+  .console .line{padding:5px 0; display:flex; gap:8px; border-bottom:1px dashed rgba(255,255,255,.05);}
+  .console .ok{color:var(--ok);}
+  .console .err{color:var(--err);}
+  .console .info{color:var(--muted);}
+  .console .empty{color:var(--muted); opacity:.6; font-style:italic;}
+  .summary{padding:10px 18px; border-top:1px solid var(--border); font-size:12.5px; color:var(--muted); background:var(--panel2);}
+
+  footer{text-align:center; padding:10px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px;">☕</span>
+    <div>Aula 03 — Demonstração
+      <small>Testes Java · kata completo em 7 ciclos Red-Green-Refactor</small>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <a class="backlink" href="01_exposicao.html">← Exposição</a>
+    <a class="backlink" href="03_pratica.html" style="border-color:var(--accent); color:var(--accent);">Prática Guiada →</a>
+  </div>
+</header>
+
+<div class="examples" id="examples"></div>
+
+<main>
+  <div>
+    <div class="analogy" id="analogyBox"></div>
+    <div class="panel">
+      <div class="panelbar">
+        <span class="dot3" style="background:#e0603e;"></span>
+        <span class="dot3" style="background:#e0b03e;"></span>
+        <span class="dot3" style="background:#5cb583;"></span>
+        <span class="filename" id="filename">SomaDeTextoTest.java</span>
+      </div>
+      <div class="editor"><pre id="codeArea"></pre></div>
+      <div class="controls">
+        <button class="btn run" id="runBtn">▶ Executar</button>
+        <button class="btn reset" id="resetBtn">↺ Reset</button>
+        <button class="btn fast" id="fastBtn">⚡ Rápido</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panelbar"><span class="filename">💻 Saída do console</span></div>
+    <div class="console" id="consoleArea"><div class="line empty">Selecione "Executar" para ver o resultado dos testes...</div></div>
+    <div class="summary" id="summary">Aguardando execução</div>
+  </div>
+</main>
+
+<footer>Aula 03 · Testes Java · @karizeviecelli · 2026</footer>
+
+<script>
+  var EXEMPLOS = [
+    {
+      titulo: "1. Vermelho — o destino que não existe",
+      curto: "Red: teste para caso vazio",
+      icone: "🔴",
+      arquivo: "SomaDeTextoTest.java",
+      analogiaIcone: "🧭",
+      analogia: "É como digitar um endereço no GPS antes de ligar o carro: a classe SomaDeTexto nem existe ainda, então o teste sequer compila. Isso é o vermelho — uma descrição precisa de um destino que o mapa atual não alcança.",
+      codigo: [
+        "class SomaDeTextoTest {",
+        "",
+        "    @Test",
+        "    void deveRetornarZeroParaTextoVazio() {",
+        "        SomaDeTexto s = new SomaDeTexto();",
+        "        assertEquals(0, s.somar(\"\"));",
+        "    }",
+        "}"
+      ],
+      saida: [
+        {t:"err",  m:"❌ erro de compilação: classe SomaDeTexto não existe"},
+        {t:"info", m:"🔴 vermelho esperado — o próximo passo é criar o mínimo pra compilar"}
+      ]
+    },
+    {
+      titulo: "2. Verde — o mínimo pra sair da garagem",
+      curto: "Green: implementação mínima",
+      icone: "🟢",
+      arquivo: "SomaDeTexto.java",
+      analogiaIcone: "⛽",
+      analogia: "Não é encher o tanque — é só o suficiente pra sair da garagem. Retornar 0 sempre já deixa o teste verde. Feio? Talvez. Funciona pro caso atual? Sim. É exatamente isso que o ciclo pede agora.",
+      codigo: [
+        "class SomaDeTexto {",
+        "",
+        "    int somar(String texto) {",
+        "        return 0;",
+        "    }",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando SomaDeTextoTest ..."},
+        {t:"ok",   m:"✅ deveRetornarZeroParaTextoVazio — esperado 0, obtido 0"},
+        {t:"info", m:"🟢 verde — implementação mínima, ainda \"chumbada\""}
+      ]
+    },
+    {
+      titulo: "3. Vermelho de novo — uma rua nova no mapa",
+      curto: "Red: um número sozinho",
+      icone: "🔴",
+      arquivo: "SomaDeTextoTest.java",
+      analogiaIcone: "🚧",
+      analogia: "Um novo teste é uma rua que o carro atual ainda não sabe percorrer: a implementação \"chumbada\" em 0 não serve mais assim que exigimos um comportamento novo.",
+      codigo: [
+        "@Test",
+        "void deveRetornarOProprioNumeroParaUmValor() {",
+        "    SomaDeTexto s = new SomaDeTexto();",
+        "    assertEquals(1, s.somar(\"1\"));",
+        "}"
+      ],
+      saida: [
+        {t:"err",  m:"❌ deveRetornarOProprioNumeroParaUmValor — esperado 1, obtido 0"},
+        {t:"info", m:"🔴 vermelho esperado — a implementação atual não cobre esse caso"}
+      ]
+    },
+    {
+      titulo: "4. Verde de novo — reabastecendo o suficiente",
+      curto: "Green: parse de um número",
+      icone: "🟢",
+      arquivo: "SomaDeTexto.java",
+      analogiaIcone: "⛽",
+      analogia: "Reabastece só o necessário pra cobrir a rota nova, sem exagerar. Aqui isso significa: tratar o vazio como 0, e converter qualquer outro texto em número.",
+      codigo: [
+        "int somar(String texto) {",
+        "    if (texto.isEmpty()) return 0;",
+        "    return Integer.parseInt(texto);",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando SomaDeTextoTest ..."},
+        {t:"ok",   m:"✅ deveRetornarZeroParaTextoVazio — esperado 0, obtido 0"},
+        {t:"ok",   m:"✅ deveRetornarOProprioNumeroParaUmValor — esperado 1, obtido 1"},
+        {t:"info", m:"🟢 verde — os dois testes passam"}
+      ]
+    },
+    {
+      titulo: "5. Vermelho — um cruzamento mais complexo",
+      curto: "Red: vários números com vírgula",
+      icone: "🔴",
+      arquivo: "SomaDeTextoTest.java",
+      analogiaIcone: "🚦",
+      analogia: "Um cruzamento com várias saídas ao mesmo tempo: o carro atual só sabe seguir em frente com um número, e agora precisamos somar vários separados por vírgula.",
+      codigo: [
+        "@Test",
+        "void deveSomarNumerosSeparadosPorVirgula() {",
+        "    SomaDeTexto s = new SomaDeTexto();",
+        "    assertEquals(6, s.somar(\"1,2,3\"));",
+        "}"
+      ],
+      saida: [
+        {t:"err",  m:"❌ deveSomarNumerosSeparadosPorVirgula — NumberFormatException: \"1,2,3\""},
+        {t:"info", m:"🔴 vermelho esperado — parseInt não entende vírgula"}
+      ]
+    },
+    {
+      titulo: "6. Verde — ajustando a rota pro cruzamento",
+      curto: "Green: split e soma",
+      icone: "🟢",
+      arquivo: "SomaDeTexto.java",
+      analogiaIcone: "🗺️",
+      analogia: "Generalizar a rota pra cobrir qualquer número de saídas do cruzamento: dividir o texto pela vírgula e somar cada pedaço, um por um.",
+      codigo: [
+        "int somar(String texto) {",
+        "    if (texto.isEmpty()) return 0;",
+        "    String[] partes = texto.split(\",\");",
+        "    int total = 0;",
+        "    for (String p : partes) {",
+        "        total += Integer.parseInt(p);",
+        "    }",
+        "    return total;",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando SomaDeTextoTest ..."},
+        {t:"ok",   m:"✅ deveRetornarZeroParaTextoVazio"},
+        {t:"ok",   m:"✅ deveRetornarOProprioNumeroParaUmValor"},
+        {t:"ok",   m:"✅ deveSomarNumerosSeparadosPorVirgula — esperado 6, obtido 6"},
+        {t:"info", m:"🟢 verde — os três testes passam"}
+      ]
+    },
+    {
+      titulo: "7. Refactor — reforma com os moradores dentro",
+      curto: "Refactor: streams, mesmo comportamento",
+      icone: "🔵",
+      arquivo: "SomaDeTexto.java",
+      analogiaIcone: "🏗️",
+      analogia: "Trocar o encanamento sem tirar os moradores de casa: o código muda de forma (agora usando streams), mas o comportamento — e os três testes — continuam exatamente os mesmos.",
+      codigo: [
+        "int somar(String texto) {",
+        "    if (texto.isEmpty()) return 0;",
+        "",
+        "    return Arrays.stream(texto.split(\",\"))",
+        "                 .mapToInt(Integer::parseInt)",
+        "                 .sum();",
+        "}"
+      ],
+      saida: [
+        {t:"info", m:"▶ Executando SomaDeTextoTest ..."},
+        {t:"ok",   m:"✅ deveRetornarZeroParaTextoVazio"},
+        {t:"ok",   m:"✅ deveRetornarOProprioNumeroParaUmValor"},
+        {t:"ok",   m:"✅ deveSomarNumerosSeparadosPorVirgula"},
+        {t:"info", m:"🔵 refactor concluído — comportamento idêntico, código mais limpo"}
+      ]
+    }
+  ];
+
+
+  var KW = /^(abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|var|void|volatile|while)$/;
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function realcar(linha) {
+    var tokens = [];
+    var i = 0, s = linha;
+    while (i < s.length) {
+      if (s[i] === '/' && s[i+1] === '/') {
+        var j = i; while (j < s.length && s[j] !== '\n') j++;
+        tokens.push('<span class="cmt">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '"') {
+        var j = i + 1;
+        while (j < s.length && s[j] !== '"') { if (s[j] === '\\') j++; j++; }
+        j++;
+        tokens.push('<span class="str">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '@') {
+        var j = i + 1; while (j < s.length && /\w/.test(s[j])) j++;
+        tokens.push('<span class="ann">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (/[a-zA-Z_$]/.test(s[i])) {
+        var j = i; while (j < s.length && /[a-zA-Z0-9_$]/.test(s[j])) j++;
+        var w = s.slice(i, j);
+        if (KW.test(w)) tokens.push('<span class="kw">' + esc(w) + '</span>');
+        else tokens.push(esc(w));
+        i = j; continue;
+      }
+      if (/[0-9]/.test(s[i])) {
+        var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++;
+        tokens.push('<span class="num">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      tokens.push(esc(s[i])); i++;
+    }
+    return tokens.join('');
+  }
+
+  var atual = 0;
+  var rapido = false;
+  var digitando = null;
+
+  var exContainer = document.getElementById('examples');
+  EXEMPLOS.forEach(function(ex, i) {
+    var b = document.createElement('button');
+    b.className = 'exbtn' + (i === 0 ? ' active' : '');
+    b.innerHTML = '<b>' + ex.icone + ' ' + ex.titulo + '</b><span>' + ex.curto + '</span>';
+    b.onclick = function(){ selecionar(i); };
+    exContainer.appendChild(b);
+  });
+  var botoes = document.querySelectorAll('.exbtn');
+
+  function selecionar(i) {
+    atual = i;
+    botoes.forEach(function(b, n){ b.classList.toggle('active', n === i); });
+    var ex = EXEMPLOS[i];
+    document.getElementById('filename').textContent = ex.arquivo;
+    document.getElementById('analogyBox').innerHTML =
+      '<span class="ic">' + ex.analogiaIcone + '</span><div><b>Analogia:</b> ' + ex.analogia + '</div>';
+    resetar();
+    digitar();
+  }
+
+  function resetar() {
+    if (digitando) clearInterval(digitando);
+    document.getElementById('codeArea').innerHTML = '';
+    document.getElementById('consoleArea').innerHTML = '<div class="line empty">Selecione "Executar" para ver o resultado dos testes...</div>';
+    document.getElementById('summary').textContent = 'Aguardando execução';
+  }
+
+  function digitar() {
+    if (digitando) clearInterval(digitando);
+    var ex = EXEMPLOS[atual];
+    var textoCompleto = ex.codigo.join('\n');
+    var codeArea = document.getElementById('codeArea');
+
+    if (rapido) {
+      codeArea.innerHTML = ex.codigo.map(realcar).join('\n');
+      mostrarSaida();
+      return;
+    }
+
+    var pos = 0;
+    codeArea.textContent = '';
+    digitando = setInterval(function () {
+      pos += 3;
+      if (pos >= textoCompleto.length) {
+        pos = textoCompleto.length;
+        clearInterval(digitando);
+        codeArea.innerHTML = ex.codigo.map(realcar).join('\n');
+        setTimeout(mostrarSaida, 350);
+        return;
+      }
+      codeArea.textContent = textoCompleto.slice(0, pos);
+      codeArea.innerHTML += '<span class="cursor"></span>';
+    }, 12);
+  }
+
+  function mostrarSaida() {
+    var ex = EXEMPLOS[atual];
+    var consoleArea = document.getElementById('consoleArea');
+    consoleArea.innerHTML = '';
+    var ok = 0, total = 0;
+    ex.saida.forEach(function (linha, idx) {
+      setTimeout(function () {
+        var div = document.createElement('div');
+        div.className = 'line ' + linha.t;
+        div.textContent = linha.m;
+        consoleArea.appendChild(div);
+        consoleArea.scrollTop = consoleArea.scrollHeight;
+        if (linha.t === 'ok') ok++;
+        if (linha.t === 'ok' || linha.t === 'err') total++;
+        document.getElementById('summary').textContent =
+          ok + ' verificação(ões) ok de ' + total + ' até agora';
+      }, rapido ? 0 : idx * 220);
+    });
+  }
+
+  document.getElementById('runBtn').onclick = function () { digitar(); };
+  document.getElementById('resetBtn').onclick = function () { resetar(); };
+  document.getElementById('fastBtn').onclick = function () {
+    rapido = !rapido;
+    this.classList.toggle('active', rapido);
+    this.textContent = rapido ? '⚡ Rápido (ligado)' : '⚡ Rápido';
+  };
+
+  selecionar(0);
+</script>
+</body>
+</html>

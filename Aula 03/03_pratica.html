@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 03 — Prática Guiada · TDD: Red, Green, Refactor</title>
+<style>
+  :root{
+    --bg:#1b140f; --panel:#241a14; --panel2:#2c2015; --editor:#150f0a;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 15% 10%, #2b2015 0%, var(--bg) 55%); color:var(--text); min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,.15); flex-wrap:wrap; gap:12px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .backlink{color:var(--muted); text-decoration:none; font-size:13px; border:1px solid var(--border); padding:7px 14px; border-radius:20px;}
+  .backlink:hover{border-color:var(--accent); color:var(--accent);}
+  .timerbox{display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border); padding:6px 10px; border-radius:20px;}
+  .timerbox span{font-variant-numeric:tabular-nums; font-size:13px; color:var(--muted); min-width:44px;}
+  .timerbtn{background:none; border:none; color:var(--accent); cursor:pointer; font-size:15px;}
+
+  .contextbox{
+    max-width:980px; margin:20px auto 0; padding:16px 22px; background:rgba(201,162,39,.08);
+    border:1px dashed rgba(201,162,39,.4); border-radius:12px; font-size:14.5px; color:#e9d9b8; display:flex; gap:12px;
+  }
+
+  .progresswrap{max-width:980px; margin:16px auto 0; padding:0 22px;}
+  .progressbar-outer{height:8px; background:var(--panel); border-radius:6px; overflow:hidden; border:1px solid var(--border);}
+  .progressbar-inner{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s ease;}
+  .progresslabel{font-size:12.5px; color:var(--muted); margin-top:6px;}
+
+  main{max-width:980px; margin:18px auto 60px; padding:0 22px; display:flex; flex-direction:column; gap:14px;}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .card.done{border-color:var(--ok);}
+  .cardhead{display:flex; align-items:center; gap:14px; padding:16px 18px; cursor:pointer;}
+  .num{
+    width:32px; height:32px; border-radius:50%; background:var(--panel2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:var(--accent2); flex-shrink:0;
+  }
+  .card.done .num{background:var(--ok); color:#0f1c14; border-color:var(--ok);}
+  .cardtitle{flex:1;}
+  .cardtitle b{font-size:15.5px;}
+  .cardtitle p{margin:2px 0 0; font-size:13px; color:var(--muted);}
+  .chev{color:var(--muted); transition:transform .2s;}
+  .card.open .chev{transform:rotate(90deg);}
+  .cardbody{display:none; padding:0 18px 18px; border-top:1px solid var(--border);}
+  .card.open .cardbody{display:block;}
+  .desc{font-size:14.5px; color:var(--text); line-height:1.6; padding-top:14px;}
+
+  .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .toggle{
+    background:transparent; border:1px solid var(--border); color:var(--muted); padding:7px 14px;
+    border-radius:8px; font-size:12.5px; cursor:pointer;
+  }
+  .toggle:hover{border-color:var(--accent2); color:var(--accent2);}
+  .hintbox, .gabbox{display:none; margin-top:12px;}
+  .hintbox.show, .gabbox.show{display:block;}
+  .hintbox{background:rgba(201,162,39,.08); border:1px dashed rgba(201,162,39,.4); border-radius:10px; padding:12px 14px; font-size:13.5px; color:#e9d9b8;}
+  .gabbox pre{
+    background:var(--editor); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+    font-family:'Fira Code',Consolas,monospace; font-size:13px; line-height:1.65; overflow:auto; margin:0; color:#e7d9c4;
+  }
+  .kw{color:#e08a3e;} .str{color:#8fbf7f;} .ann{color:#c9a227;} .cmt{color:#7d6a58;} .num{color:#7fb3d5;}
+
+  .checkline{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:13.5px; color:var(--muted);}
+  .checkline input{width:16px; height:16px; accent-color:var(--accent);}
+
+  .classref{
+    max-width:980px; margin:0 auto; padding:0 22px 4px; font-size:12.5px; color:var(--muted);
+  }
+  .classref code{background:var(--editor); border:1px solid var(--border); padding:2px 6px; border-radius:5px; color:#f0c987; font-family:'Fira Code',Consolas,monospace;}
+
+  footer{text-align:center; padding:16px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px;">🛠</span>
+    <div>Aula 03 — Prática Guiada
+      <small>Kata FizzBuzz, ciclo a ciclo</small>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="timerbox">
+      <button class="timerbtn" id="timerToggle">▶</button>
+      <span id="timerDisplay">00:00</span>
+    </div>
+    <a class="backlink" href="02_demo.html">← Demonstração</a>
+    <a class="backlink" href="04_desafio.html" style="border-color:var(--accent); color:var(--accent);">Desafio →</a>
+  </div>
+</header>
+
+<div class="contextbox">
+  <span style="font-size:20px;">🥋</span>
+  <div>Nesta prática você vai construir a classe <b>FizzBuzz</b> do zero, ciclo por ciclo: primeiro o teste vermelho, depois o código verde mínimo. Não existe uma classe de produção pronta — ela nasce dos testes. Tente escrever sozinho antes de abrir o gabarito.</div>
+</div>
+
+<div class="classref">Regra do kata: <code>calcular(int n)</code> retorna <code>String</code> — múltiplos de 3 viram "Fizz", múltiplos de 5 viram "Buzz", múltiplos de 3 e 5 viram "FizzBuzz", os demais retornam o próprio número como texto</div>
+
+<div class="progresswrap">
+  <div class="progressbar-outer"><div class="progressbar-inner" id="progressInner"></div></div>
+  <div class="progresslabel" id="progressLabel">0 de 6 passos concluídos</div>
+</div>
+
+<main id="cards"></main>
+
+<footer>🛠 Aula 03 · Testes Java · @karizeviecelli · 2026</footer>
+
+<script>
+  var PASSOS = [
+    {
+      titulo: "Ciclo 1 — número comum",
+      resumo: "Red + Green",
+      desc: "Escreva o teste <b>vermelho</b> para um número comum, ex.: <code>calcular(1)</code> deve retornar <code>\"1\"</code>. Depois escreva o código <b>verde mínimo</b> que faz esse teste passar.",
+      dica: "Verde mínimo aqui pode ser simplesmente devolver o número como texto, sem nenhuma regra de Fizz/Buzz ainda.",
+      gabarito: [
+        "// Teste (vermelho primeiro)",
+        "class FizzBuzzTest {",
+        "",
+        "    FizzBuzz fb;",
+        "",
+        "    @BeforeEach",
+        "    void preparar() {",
+        "        fb = new FizzBuzz();",
+        "    }",
+        "",
+        "    @Test",
+        "    void deveRetornarONumeroComoTexto() {",
+        "        assertEquals(\"1\", fb.calcular(1));",
+        "    }",
+        "}",
+        "",
+        "// Produção (verde mínimo)",
+        "class FizzBuzz {",
+        "    String calcular(int n) {",
+        "        return String.valueOf(n);",
+        "    }",
+        "}"
+      ]
+    },
+    {
+      titulo: "Ciclo 2 — múltiplos de 3",
+      resumo: "Red + Green",
+      desc: "Escreva o teste <b>vermelho</b> para um múltiplo de 3, ex.: <code>calcular(3)</code> deve retornar <code>\"Fizz\"</code>. Depois evolua o código pra ficar <b>verde</b> de novo, sem quebrar o teste anterior.",
+      dica: "O jeito mais simples é um `if` novo antes do `return` genérico — ainda não precisa ser elegante.",
+      gabarito: [
+        "@Test",
+        "void deveRetornarFizzParaMultiplosDeTres() {",
+        "    assertEquals(\"Fizz\", fb.calcular(3));",
+        "}",
+        "",
+        "// Produção",
+        "String calcular(int n) {",
+        "    if (n % 3 == 0) return \"Fizz\";",
+        "    return String.valueOf(n);",
+        "}"
+      ]
+    },
+    {
+      titulo: "Ciclo 3 — múltiplos de 5",
+      resumo: "Red + Green",
+      desc: "Escreva o teste <b>vermelho</b> para um múltiplo de 5, ex.: <code>calcular(5)</code> deve retornar <code>\"Buzz\"</code>. Evolua o código de novo.",
+      dica: "Mais um `if`, seguindo o mesmo padrão do ciclo anterior.",
+      gabarito: [
+        "@Test",
+        "void deveRetornarBuzzParaMultiplosDeCinco() {",
+        "    assertEquals(\"Buzz\", fb.calcular(5));",
+        "}",
+        "",
+        "// Produção",
+        "String calcular(int n) {",
+        "    if (n % 3 == 0) return \"Fizz\";",
+        "    if (n % 5 == 0) return \"Buzz\";",
+        "    return String.valueOf(n);",
+        "}"
+      ]
+    },
+    {
+      titulo: "Ciclo 4 — múltiplos de 3 e 5",
+      resumo: "Red + Green",
+      desc: "Escreva o teste <b>vermelho</b> para um múltiplo de 3 <u>e</u> 5 ao mesmo tempo, ex.: <code>calcular(15)</code> deve retornar <code>\"FizzBuzz\"</code>. Cuidado com a ordem dos `if` na hora do verde.",
+      dica: "Se você testar \"múltiplo de 3\" antes de \"múltiplo de 15\", o 15 vai cair no Fizz e nunca chegar no FizzBuzz. A ordem dos ifs importa.",
+      gabarito: [
+        "@Test",
+        "void deveRetornarFizzBuzzParaMultiplosDeTresECinco() {",
+        "    assertEquals(\"FizzBuzz\", fb.calcular(15));",
+        "}",
+        "",
+        "// Produção",
+        "String calcular(int n) {",
+        "    if (n % 15 == 0) return \"FizzBuzz\";",
+        "    if (n % 3 == 0) return \"Fizz\";",
+        "    if (n % 5 == 0) return \"Buzz\";",
+        "    return String.valueOf(n);",
+        "}"
+      ]
+    },
+    {
+      titulo: "Ciclo 5 — Refactor",
+      resumo: "Consolidar com @ParameterizedTest",
+      desc: "Sem mudar o comportamento, junte os 4 testes separados num único teste parametrizado com <code>@CsvSource</code>, cobrindo os 4 casos que você já escreveu.",
+      dica: "Isso é refactor no teste, não na produção — o objetivo é o mesmo: simplificar sem quebrar nada.",
+      gabarito: [
+        "@ParameterizedTest",
+        "@CsvSource({",
+        "    \"1, 1\",",
+        "    \"3, Fizz\",",
+        "    \"5, Buzz\",",
+        "    \"15, FizzBuzz\"",
+        "})",
+        "void deveCalcularFizzBuzzCorretamente(int numero, String esperado) {",
+        "    assertEquals(esperado, fb.calcular(numero));",
+        "}"
+      ]
+    },
+    {
+      titulo: "Rodar tudo e conferir",
+      resumo: "checagem final",
+      desc: "Rode a classe <b>FizzBuzzTest</b> completa e confirme que tudo passa, sem alterar o comportamento da classe <code>FizzBuzz</code> — só o teste foi refatorado no ciclo anterior.",
+      dica: "Se algo falhar depois do refactor do teste, o comportamento da produção não mudou — o bug está na forma como o novo teste parametrizado foi escrito.",
+      gabarito: [
+        "$ mvn test",
+        "",
+        "[INFO] Running FizzBuzzTest",
+        "✅ deveCalcularFizzBuzzCorretamente (4 execuções)",
+        "[INFO] Tests run: 4, Failures: 0"
+      ]
+    }
+  ];
+
+  var KW = /^(abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|var|void|volatile|while)$/;
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function realcar(linha) {
+    var tokens = [];
+    var i = 0, s = linha;
+    while (i < s.length) {
+      if (s[i] === '/' && s[i+1] === '/') {
+        var j = i; while (j < s.length && s[j] !== '\n') j++;
+        tokens.push('<span class="cmt">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '"') {
+        var j = i + 1;
+        while (j < s.length && s[j] !== '"') { if (s[j] === '\\') j++; j++; }
+        j++;
+        tokens.push('<span class="str">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (s[i] === '@') {
+        var j = i + 1; while (j < s.length && /\w/.test(s[j])) j++;
+        tokens.push('<span class="ann">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      if (/[a-zA-Z_$]/.test(s[i])) {
+        var j = i; while (j < s.length && /[a-zA-Z0-9_$]/.test(s[j])) j++;
+        var w = s.slice(i, j);
+        if (KW.test(w)) tokens.push('<span class="kw">' + esc(w) + '</span>');
+        else tokens.push(esc(w));
+        i = j; continue;
+      }
+      if (/[0-9]/.test(s[i])) {
+        var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++;
+        tokens.push('<span class="num">' + esc(s.slice(i, j)) + '</span>'); i = j; continue;
+      }
+      tokens.push(esc(s[i])); i++;
+    }
+    return tokens.join('');
+  }
+
+  var cardsEl = document.getElementById('cards');
+  var estado = PASSOS.map(function(){ return { open:false, hint:false, gab:false, done:false }; });
+
+  function render() {
+    cardsEl.innerHTML = '';
+    PASSOS.forEach(function(p, i) {
+      var st = estado[i];
+      var card = document.createElement('div');
+      card.className = 'card' + (st.open ? ' open' : '') + (st.done ? ' done' : '');
+
+      var head = document.createElement('div');
+      head.className = 'cardhead';
+      head.innerHTML =
+        '<div class="num">' + (st.done ? '✓' : (i + 1)) + '</div>' +
+        '<div class="cardtitle"><b>' + p.titulo + '</b><p>' + p.resumo + '</p></div>' +
+        '<div class="chev">›</div>';
+      head.onclick = function () { st.open = !st.open; render(); };
+      card.appendChild(head);
+
+      var body = document.createElement('div');
+      body.className = 'cardbody';
+      body.innerHTML =
+        '<div class="desc">' + p.desc + '</div>' +
+        '<div class="row">' +
+          '<button class="toggle" data-a="hint">💡 Dica</button>' +
+          '<button class="toggle" data-a="gab">📖 Ver gabarito</button>' +
+        '</div>' +
+        '<div class="hintbox' + (st.hint ? ' show' : '') + '">' + p.dica + '</div>' +
+        '<div class="gabbox' + (st.gab ? ' show' : '') + '"><pre>' + p.gabarito.map(realcar).join('\n') + '</pre></div>' +
+        '<label class="checkline"><input type="checkbox" ' + (st.done ? 'checked' : '') + '> Marquei este passo como concluído</label>';
+
+      body.querySelector('[data-a="hint"]').onclick = function (e) { e.stopPropagation(); st.hint = !st.hint; render(); };
+      body.querySelector('[data-a="gab"]').onclick = function (e) { e.stopPropagation(); st.gab = !st.gab; render(); };
+      body.querySelector('input[type="checkbox"]').onclick = function (e) { st.done = e.target.checked; render(); };
+
+      card.appendChild(body);
+      cardsEl.appendChild(card);
+    });
+    atualizarProgresso();
+  }
+
+  function atualizarProgresso() {
+    var feitos = estado.filter(function (s) { return s.done; }).length;
+    var pct = (feitos / PASSOS.length) * 100;
+    document.getElementById('progressInner').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = feitos + ' de ' + PASSOS.length + ' passos concluídos';
+  }
+
+  estado[0].open = true;
+  render();
+
+  var segundos = 0, rodando = false, intervalo = null;
+  document.getElementById('timerToggle').onclick = function () {
+    rodando = !rodando;
+    this.textContent = rodando ? '⏸' : '▶';
+    if (rodando) {
+      intervalo = setInterval(function () {
+        segundos++;
+        var m = Math.floor(segundos / 60), s = segundos % 60;
+        document.getElementById('timerDisplay').textContent =
+          (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      }, 1000);
+    } else {
+      clearInterval(intervalo);
+    }
+  };
+</script>
+</body>
+</html>
