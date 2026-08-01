@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 02 — Feedback · Assertions Avançadas & @ParameterizedTest</title>
+<style>
+  :root{
+    --bg:#1b140f; --panel:#241a14; --panel2:#2c2015; --editor:#150f0a;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 15% 10%, #2b2015 0%, var(--bg) 55%); color:var(--text); min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between; padding:16px 28px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,.15); flex-wrap:wrap; gap:12px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .backlink{color:var(--muted); text-decoration:none; font-size:13px; border:1px solid var(--border); padding:7px 14px; border-radius:20px;}
+  .backlink:hover{border-color:var(--accent); color:var(--accent);}
+
+  main{max-width:900px; margin:0 auto; padding:26px 22px 60px;}
+
+  .addbar{display:flex; gap:10px; margin-bottom:16px;}
+  .addbar input{
+    flex:1; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:12px 16px;
+    border-radius:10px; font-size:14px;
+  }
+  .addbar input::placeholder{color:var(--muted);}
+  .btn{border:none; padding:11px 18px; border-radius:10px; font-size:13.5px; font-weight:700; cursor:pointer;}
+  .btn.add{background:linear-gradient(135deg,var(--accent),#b5651d); color:#1b140f;}
+
+  .statsbar{
+    display:flex; align-items:stretch; gap:12px; margin-bottom:22px; flex-wrap:wrap;
+  }
+  .statcard{
+    flex:1; min-width:150px; background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:14px 18px; display:flex; flex-direction:column; justify-content:center; gap:4px;
+  }
+  .statlabel{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+  .statvalue{font-size:22px; font-weight:700; color:var(--accent2);}
+  .statvalue small{font-size:12.5px; color:var(--muted); font-weight:400;}
+  .btn.export{
+    background:transparent; border:1px solid var(--border); color:var(--text); display:flex; align-items:center; gap:8px;
+    white-space:nowrap;
+  }
+  .btn.export:hover{border-color:var(--accent2); color:var(--accent2);}
+
+  .student{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;
+  }
+  .studenthead{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .studenthead b{font-size:16px;}
+  .remove{background:none; border:none; color:var(--err); font-size:13px; cursor:pointer; opacity:.7;}
+  .remove:hover{opacity:1;}
+
+  .stars{display:flex; gap:4px; margin-bottom:16px;}
+  .star{font-size:24px; cursor:pointer; color:var(--border); transition:.15s;}
+  .star.filled{color:var(--accent2);}
+
+  .critlist{display:flex; flex-direction:column; gap:8px; margin-bottom:16px;}
+  .crit{display:flex; align-items:flex-start; gap:9px; font-size:13.5px; color:var(--muted);}
+  .crit input{margin-top:3px; width:16px; height:16px; accent-color:var(--ok);}
+
+  textarea{
+    width:100%; min-height:80px; background:var(--editor); border:1px solid var(--border); color:var(--text);
+    border-radius:10px; padding:12px 14px; font-size:13.5px; font-family:inherit; resize:vertical; margin-bottom:14px;
+  }
+  textarea::placeholder{color:var(--muted);}
+
+  .studentfoot{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .btn.save{background:linear-gradient(135deg,var(--ok),#2f7d52); color:#0f1c14;}
+  .savedtag{font-size:12px; color:var(--ok); opacity:0; transition:opacity .3s;}
+  .savedtag.show{opacity:1;}
+
+  .empty{text-align:center; color:var(--muted); padding:40px 0; font-size:14px;}
+
+  footer{text-align:center; padding:16px; font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span style="font-size:22px;">📊</span>
+    <div>Aula 02 — Feedback
+      <small>Painel do professor · avaliação individual</small>
+    </div>
+  </div>
+  <a class="backlink" href="04_desafio.html">← Desafio</a>
+</header>
+
+<main>
+  <div class="addbar">
+    <input type="text" id="nomeInput" placeholder="Nome do aluno...">
+    <button class="btn add" id="addBtn">+ Adicionar aluno</button>
+  </div>
+
+  <div class="statsbar">
+    <div class="statcard">
+      <div class="statlabel">Média da turma</div>
+      <div class="statvalue" id="statMedia">—</div>
+    </div>
+    <div class="statcard">
+      <div class="statlabel">Alunos avaliados</div>
+      <div class="statvalue" id="statAvaliados">0 <small>/ 0</small></div>
+    </div>
+    <button class="btn export" id="exportBtn">⬇ Exportar XLS</button>
+  </div>
+
+  <div id="lista"></div>
+</main>
+
+<footer>📊 Aula 02 · Testes Java · @karizeviecelli · 2026</footer>
+
+<script>
+  var CHAVE = 'feedback_aula02';
+  var CRITERIOS = [
+    "Usa @ParameterizedTest (CsvSource, ValueSource ou MethodSource) em pelo menos 3 testes",
+    "Cobre os três tipos de triângulo e o caso inválido",
+    "Nomes de método / name= claros por execução",
+    "Suíte roda 100% verde"
+  ];
+
+  function carregar() {
+    try {
+      var dados = JSON.parse(localStorage.getItem(CHAVE));
+      return Array.isArray(dados) ? dados : [];
+    } catch (e) { return []; }
+  }
+
+  function salvar(alunos) {
+    localStorage.setItem(CHAVE, JSON.stringify(alunos));
+  }
+
+  var alunos = carregar();
+
+  function calcularMedia() {
+    var avaliados = alunos.filter(function (a) { return a.nota > 0; });
+    if (avaliados.length === 0) return { media: null, avaliados: 0, total: alunos.length };
+    var soma = avaliados.reduce(function (acc, a) { return acc + a.nota; }, 0);
+    return { media: soma / avaliados.length, avaliados: avaliados.length, total: alunos.length };
+  }
+
+  function atualizarResumo() {
+    var r = calcularMedia();
+    var statMedia = document.getElementById('statMedia');
+    var statAvaliados = document.getElementById('statAvaliados');
+    statMedia.innerHTML = r.media === null ? '—' : r.media.toFixed(1) + ' <small>★ de 5</small>';
+    statAvaliados.innerHTML = r.avaliados + ' <small>/ ' + r.total + '</small>';
+  }
+
+  function render() {
+    var lista = document.getElementById('lista');
+    if (alunos.length === 0) {
+      lista.innerHTML = '<div class="empty">Nenhum aluno adicionado ainda. Use o campo acima para começar a registrar o feedback.</div>';
+      atualizarResumo();
+      return;
+    }
+    lista.innerHTML = '';
+    alunos.forEach(function (aluno, i) {
+      var div = document.createElement('div');
+      div.className = 'student';
+
+      var estrelasHtml = '';
+      for (var s = 1; s <= 5; s++) {
+        estrelasHtml += '<span class="star' + (s <= aluno.nota ? ' filled' : '') + '" data-s="' + s + '">★</span>';
+      }
+
+      var critHtml = '';
+      CRITERIOS.forEach(function (c, ci) {
+        var marcado = aluno.criterios && aluno.criterios[ci];
+        critHtml += '<label class="crit"><input type="checkbox" data-c="' + ci + '" ' + (marcado ? 'checked' : '') + '> ' + c + '</label>';
+      });
+
+      div.innerHTML =
+        '<div class="studenthead"><b>' + aluno.nome + '</b><button class="remove" data-remove="1">✕ remover</button></div>' +
+        '<div class="stars">' + estrelasHtml + '</div>' +
+        '<div class="critlist">' + critHtml + '</div>' +
+        '<textarea placeholder="Observações sobre o desempenho do aluno...">' + (aluno.obs || '') + '</textarea>' +
+        '<div class="studentfoot"><button class="btn save">💾 Salvar</button><span class="savedtag">Salvo ✓</span></div>';
+
+      div.querySelectorAll('.star').forEach(function (starEl) {
+        starEl.onclick = function () {
+          aluno.nota = parseInt(starEl.getAttribute('data-s'), 10);
+          render();
+        };
+      });
+
+      div.querySelectorAll('.crit input').forEach(function (chk) {
+        chk.onchange = function () {
+          aluno.criterios = aluno.criterios || {};
+          aluno.criterios[chk.getAttribute('data-c')] = chk.checked;
+        };
+      });
+
+      div.querySelector('.remove').onclick = function () {
+        alunos.splice(i, 1);
+        salvar(alunos);
+        render();
+      };
+
+      var textareaEl = div.querySelector('textarea');
+      var saveBtn = div.querySelector('.save');
+      var savedTag = div.querySelector('.savedtag');
+      saveBtn.onclick = function () {
+        aluno.obs = textareaEl.value;
+        salvar(alunos);
+        savedTag.classList.add('show');
+        setTimeout(function () { savedTag.classList.remove('show'); }, 1500);
+      };
+
+      lista.appendChild(div);
+    });
+    atualizarResumo();
+  }
+
+  document.getElementById('addBtn').onclick = function () {
+    var input = document.getElementById('nomeInput');
+    var nome = input.value.trim();
+    if (!nome) return;
+    alunos.push({ nome: nome, nota: 0, criterios: {}, obs: '' });
+    salvar(alunos);
+    input.value = '';
+    render();
+  };
+
+  document.getElementById('nomeInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('addBtn').click();
+  });
+
+  function escHtml(valor) {
+    return String(valor == null ? '' : valor)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function gerarXLS() {
+    var r = calcularMedia();
+    var mediaTexto = r.media === null ? 'sem avaliações ainda' : r.media.toFixed(2) + ' de 5 (' + r.avaliados + ' de ' + r.total + ' alunos avaliados)';
+
+    var linhas = [];
+    linhas.push('<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">');
+    linhas.push('<head><meta charset="UTF-8"><style>');
+    linhas.push('table{border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;}');
+    linhas.push('th,td{border:1px solid #999;padding:5px 10px;vertical-align:top;}');
+    linhas.push('th{background:#e0a83e;color:#1b140f;font-weight:bold;}');
+    linhas.push('.titulo{font-size:16px;font-weight:bold;}');
+    linhas.push('.sim{background:#d9f0e2;} .nao{background:#fbe1da;}');
+    linhas.push('</style></head><body>');
+    linhas.push('<table>');
+    linhas.push('<tr><td class="titulo" colspan="7">Feedback — Aula 02 · Testes Java</td></tr>');
+    linhas.push('<tr><td colspan="7">Média da turma: ' + escHtml(mediaTexto) + '</td></tr>');
+    linhas.push('<tr><td colspan="7"></td></tr>');
+    linhas.push('<tr>' +
+      '<th>Nome</th><th>Estrelas</th>' +
+      '<th>' + escHtml(CRITERIOS[0]) + '</th>' +
+      '<th>' + escHtml(CRITERIOS[1]) + '</th>' +
+      '<th>' + escHtml(CRITERIOS[2]) + '</th>' +
+      '<th>' + escHtml(CRITERIOS[3]) + '</th>' +
+      '<th>Observações</th></tr>');
+
+    alunos.forEach(function (a) {
+      linhas.push('<tr>');
+      linhas.push('<td>' + escHtml(a.nome) + '</td>');
+      linhas.push('<td>' + (a.nota || 0) + '</td>');
+      CRITERIOS.forEach(function (c, ci) {
+        var atendido = !!(a.criterios && a.criterios[ci]);
+        linhas.push('<td class="' + (atendido ? 'sim">Sim' : 'nao">Não') + '</td>');
+      });
+      linhas.push('<td>' + escHtml(a.obs || '') + '</td>');
+      linhas.push('</tr>');
+    });
+
+    linhas.push('</table></body></html>');
+    return linhas.join('\n');
+  }
+
+  function baixarArquivo(nome, conteudo, tipo) {
+    var blob = new Blob(['\ufeff' + conteudo], { type: tipo });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  document.getElementById('exportBtn').onclick = function () {
+    if (alunos.length === 0) {
+      alert('Adicione ao menos um aluno antes de exportar.');
+      return;
+    }
+    var xls = gerarXLS();
+    baixarArquivo('feedback_aula01.xls', xls, 'application/vnd.ms-excel');
+  };
+
+  render();
+</script>
+</body>
+</html>

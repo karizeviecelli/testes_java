@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 02 — Exposição · Assertions Avançadas & @ParameterizedTest</title>
+<style>
+  :root{
+    --bg:#1b140f; --bg2:#241b14; --panel:#2a1f17; --panel2:#332619;
+    --border:#4a3728; --text:#f3e8d8; --muted:#b8a48d;
+    --accent:#e08a3e; --accent2:#c9a227; --ok:#5cb583; --err:#e0603e;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at 20% 15%, #2b2015 0%, var(--bg) 55%);
+    color:var(--text); display:flex; flex-direction:column; min-height:100vh; overflow:hidden;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; border-bottom:1px solid var(--border); background:rgba(0,0,0,.15);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.3px;}
+  .brand .cup{font-size:22px;}
+  .brand small{display:block; font-weight:400; color:var(--muted); font-size:12px;}
+  .timer{
+    font-variant-numeric:tabular-nums; background:var(--panel); border:1px solid var(--border);
+    padding:6px 14px; border-radius:20px; font-size:13px; color:var(--muted);
+  }
+  main{flex:1; display:flex; align-items:center; justify-content:center; position:relative; padding:20px;}
+  .deck{width:min(920px,92vw); height:min(520px,72vh); position:relative;}
+  .slide{
+    position:absolute; inset:0; background:linear-gradient(160deg,var(--panel),var(--panel2));
+    border:1px solid var(--border); border-radius:18px; padding:44px 52px;
+    display:none; flex-direction:column; justify-content:center; gap:18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35); opacity:0; transform:translateX(30px);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .slide.active{display:flex; opacity:1; transform:translateX(0);}
+  .eyebrow{color:var(--accent); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;}
+  h1{font-size:38px; margin:0; line-height:1.15;}
+  h2{font-size:28px; margin:0 0 4px 0; color:var(--text);}
+  p.lead{font-size:17px; color:var(--muted); line-height:1.6; margin:0; max-width:640px;}
+  ul.points{list-style:none; margin:0; padding:0; display:grid; gap:12px;}
+  ul.points li{
+    display:flex; gap:12px; align-items:flex-start; font-size:16px; color:var(--text);
+    background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 16px;
+  }
+  ul.points li b{color:var(--accent2);}
+  .badge{display:inline-flex; align-items:center; gap:6px; background:rgba(224,138,62,.12); color:var(--accent);
+    border:1px solid rgba(224,138,62,.4); padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; width:fit-content;}
+  code.inline{background:rgba(0,0,0,.35); border:1px solid var(--border); padding:2px 8px; border-radius:6px; font-family:'Fira Code',Consolas,monospace; color:#f0c987;}
+  pre.codebox{
+    background:#160f0a; border:1px solid var(--border); border-radius:12px; padding:18px 20px;
+    font-family:'Fira Code',Consolas,monospace; font-size:14px; line-height:1.65; overflow:auto; color:#e7d9c4; margin:0;
+  }
+  .kw{color:#e08a3e;} .str{color:#8fbf7f;} .ann{color:#c9a227;} .cmt{color:#7d6a58;}
+  .analogy{
+    display:flex; gap:12px; align-items:flex-start; background:rgba(201,162,39,.08);
+    border:1px dashed rgba(201,162,39,.4); border-radius:12px; padding:14px 16px; font-size:14.5px; color:#e9d9b8;
+  }
+  .analogy .ic{font-size:20px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .cta{
+    align-self:flex-start; margin-top:6px; background:linear-gradient(135deg,var(--accent),#b5651d); color:#1b140f;
+    border:none; padding:12px 22px; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer;
+    box-shadow:0 8px 20px rgba(224,138,62,.3);
+  }
+  nav.ctrl{
+    display:flex; align-items:center; justify-content:center; gap:18px; padding:18px;
+    border-top:1px solid var(--border); background:rgba(0,0,0,.15);
+  }
+  .navbtn{
+    background:var(--panel); border:1px solid var(--border); color:var(--text); width:42px; height:42px;
+    border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:.2s;
+  }
+  .navbtn:hover{background:var(--accent); color:#1b140f; border-color:var(--accent);}
+  .navbtn:disabled{opacity:.3; cursor:default;}
+  .navbtn:disabled:hover{background:var(--panel); color:var(--text); border-color:var(--border);}
+  .dots{display:flex; gap:8px;}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--border); cursor:pointer; transition:.2s;}
+  .dot.active{background:var(--accent); width:22px; border-radius:5px;}
+  .progressbar{position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease; z-index:10;}
+  .counter{color:var(--muted); font-size:13px; min-width:48px; text-align:center;}
+  footer.brandfoot{text-align:center; padding:8px; font-size:11px; color:var(--muted); letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<div class="progressbar" id="progressbar" style="width:6.66%"></div>
+<header>
+  <div class="brand">
+    <span class="cup">☕</span>
+    <div>
+      Aula 02 — Assertions Avançadas &amp; @ParameterizedTest
+      <small>Desenvolvimento de Sistemas · Testes em Java</small>
+    </div>
+  </div>
+  <div class="timer" id="timer">00:00</div>
+</header>
+
+<main>
+  <div class="deck" id="deck">
+
+    <section class="slide active" data-index="0">
+      <span class="eyebrow">Bloco 1 · Fundamentos de JUnit 5</span>
+      <h1>Assertions Avançadas &amp; @ParameterizedTest</h1>
+      <p class="lead">Um teste por valor é bom. Um teste que cobre dezenas de valores automaticamente, sem repetir código, é melhor. Hoje você aprende a multiplicar a cobertura sem multiplicar o código.</p>
+      <span class="badge">⏱️ Aula 02 · Duração 4h</span>
+    </section>
+
+    <section class="slide" data-index="1">
+      <span class="eyebrow">Revisão rápida</span>
+      <h2>O problema de testar caso por caso</h2>
+      <div class="analogy">
+        <span class="ic">🏭</span>
+        <div>Um fiscal de qualidade não testa <b>uma única peça</b> da linha de produção e declara tudo aprovado — ele testa uma <b>amostra representativa</b>. Na Aula 01 você escreveu um teste por cenário. E se fossem 20 cenários parecidos, só mudando os números?</div>
+      </div>
+      <p class="lead">Copiar e colar o mesmo teste 20 vezes, trocando só o valor, é sinal de que existe uma ferramenta melhor: o teste parametrizado.</p>
+    </section>
+
+    <section class="slide" data-index="2">
+      <span class="eyebrow">A ferramenta</span>
+      <h2>O que é @ParameterizedTest?</h2>
+      <p class="lead">Com <code class="inline">@ParameterizedTest</code>, o mesmo método de teste roda <b>várias vezes</b>, cada execução recebendo um conjunto diferente de dados de entrada — e cada uma aparece separada no relatório.</p>
+      <ul class="points">
+        <li>🔁 <div>Troca <code class="inline">@Test</code> por <code class="inline">@ParameterizedTest</code>.</div></li>
+        <li>📦 <div>Uma anotação de <b>fonte de dados</b> (<code class="inline">@ValueSource</code>, <code class="inline">@CsvSource</code>, <code class="inline">@MethodSource</code>...) alimenta o método.</div></li>
+        <li>📊 <div>O relatório mostra cada execução separadamente, não como um teste só.</div></li>
+      </ul>
+    </section>
+
+    <section class="slide" data-index="3">
+      <span class="eyebrow">Fonte 1</span>
+      <h2>@ValueSource — uma lista simples</h2>
+      <pre class="codebox"><span class="ann">@ParameterizedTest</span>
+<span class="ann">@ValueSource</span>(ints = {2, 4, 6, 8})
+<span class="kw">void</span> <span class="str">deveSerPar</span>(<span class="kw">int</span> numero) {
+    assertTrue(numero % 2 == 0);
+}</pre>
+      <div class="analogy">
+        <span class="ic">📋</span>
+        <div>É a forma mais simples: uma lista de valores do mesmo tipo (<code class="inline">int</code>, <code class="inline">String</code>, <code class="inline">double</code>...), cada um vira uma execução do teste.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-index="4">
+      <span class="eyebrow">Fonte 2</span>
+      <h2>@CsvSource — entrada e saída juntas</h2>
+      <pre class="codebox"><span class="ann">@ParameterizedTest</span>
+<span class="ann">@CsvSource</span>({<span class="str">"0, 32"</span>, <span class="str">"100, 212"</span>})
+<span class="kw">void</span> <span class="str">deveConverter</span>(<span class="kw">double</span> celsius, <span class="kw">double</span> fahrenheit) {
+    assertEquals(fahrenheit, conversor.paraF(celsius), 0.01);
+}</pre>
+      <div class="analogy">
+        <span class="ic">💱</span>
+        <div>É como consultar uma tabela de câmbio já pronta: cada linha do texto CSV traz o valor de entrada <b>e</b> o valor de saída esperado, prontos para comparar.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-index="5">
+      <span class="eyebrow">Fonte 3</span>
+      <h2>@MethodSource — dados complexos</h2>
+      <p class="lead">Quando os dados de teste são complexos demais para caber numa anotação, um método Java monta a lista para você — como um boletim meteorológico com várias cidades e suas categorias de clima.</p>
+      <pre class="codebox"><span class="ann">@ParameterizedTest</span>
+<span class="ann">@MethodSource</span>(<span class="str">"casos"</span>)
+<span class="kw">void</span> <span class="str">deveClassificar</span>(<span class="kw">double</span> valor, String esperado) { ... }
+
+<span class="kw">static</span> Stream&lt;Arguments&gt; casos() {
+    <span class="kw">return</span> Stream.of(Arguments.of(-5.0, <span class="str">"Frio"</span>));
+}</pre>
+    </section>
+
+    <section class="slide" data-index="6">
+      <span class="eyebrow">Precisão numérica</span>
+      <h2>assertEquals com margem de erro</h2>
+      <div class="analogy">
+        <span class="ic">⚖️</span>
+        <div>Assim como a balança da padaria aceita uma variação de poucos gramas, números decimais (<code class="inline">double</code>) quase nunca batem exatamente. O terceiro parâmetro de <code class="inline">assertEquals</code> define a margem de erro aceitável.</div>
+      </div>
+      <pre class="codebox">assertEquals(97.88, resultado, <span class="num">0.01</span>);</pre>
+    </section>
+
+    <section class="slide" data-index="7">
+      <span class="eyebrow">Legibilidade</span>
+      <h2>Nomeando cada execução</h2>
+      <ul class="points">
+        <li>🏷️ <div><code class="inline">@ParameterizedTest(name = "{0}°C vira {1}°F")</code> troca o nome genérico por um nome específico por execução.</div></li>
+        <li>🔢 <div><code class="inline">{0}</code>, <code class="inline">{1}</code> referem-se aos parâmetros; <code class="inline">{index}</code> é o número da execução.</div></li>
+        <li>📈 <div>Num relatório com 20 execuções, isso é a diferença entre "achar a agulha no palheiro" e ver o problema na hora.</div></li>
+      </ul>
+    </section>
+
+    <section class="slide" data-index="8">
+      <span class="eyebrow">Fechamento</span>
+      <h2>O que vem a seguir</h2>
+      <p class="lead">Agora que você conhece @ValueSource, @CsvSource, @MethodSource e assertions com margem de erro, é hora de ver tudo isso rodando de verdade, com vários exemplos comentados.</p>
+      <button class="cta" onclick="window.location.href='02_demo.html'">Ir para a Demonstração →</button>
+    </section>
+
+  </div>
+</main>
+
+<nav class="ctrl">
+  <button class="navbtn" id="prevBtn" onclick="go(-1)">‹</button>
+  <div class="dots" id="dots"></div>
+  <span class="counter" id="counter">1/9</span>
+  <button class="navbtn" id="nextBtn" onclick="go(1)">›</button>
+</nav>
+<footer class="brandfoot">☕ Aula 02 · Desenvolvimento de Sistemas · @karizeviecelli · 2026</footer>
+
+<script>
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var idx = 0;
+
+  var dotsEl = document.getElementById('dots');
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('data-i', i);
+    d.onclick = (function(n){ return function(){ show(n); }; })(i);
+    dotsEl.appendChild(d);
+  }
+  var dots = document.querySelectorAll('.dot');
+
+  function show(n) {
+    if (n < 0 || n >= total) return;
+    slides[idx].classList.remove('active');
+    dots[idx].classList.remove('active');
+    idx = n;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('active');
+    document.getElementById('counter').textContent = (idx + 1) + '/' + total;
+    document.getElementById('progressbar').style.width = (((idx + 1) / total) * 100) + '%';
+    document.getElementById('prevBtn').disabled = (idx === 0);
+    document.getElementById('nextBtn').disabled = (idx === total - 1);
+  }
+
+  function go(delta) { show(idx + delta); }
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+
+  show(0);
+
+  var seconds = 0;
+  setInterval(function(){
+    seconds++;
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    document.getElementById('timer').textContent =
+      (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+</script>
+</body>
+</html>
